@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.goodow.realtime</groupId>
+    <artifactId>realtime-parent</artifactId>
+    <version>0.5.5-SNAPSHOT</version>
+  </parent>
   <groupId>com.goodow.drive.android.svg</groupId>
   <artifactId>drive-android-svg</artifactId>
   <version>0.0.1-SNAPSHOT</version>
@@ -9,9 +14,9 @@
   <name>drive-android-svg</name>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
+    <realtime.version>0.5.5-SNAPSHOT</realtime.version>
   </properties>
 
   <repositories>
@@ -28,7 +33,8 @@
     </repository>
     <repository>
       <id>goodow-thirdparty</id>
-      <url>https://raw.githubusercontent.com/goodow/maven/master/repositories/thirdparty/</url>
+      <url>https://raw.githubusercontent.com/goodow/maven/master/repositories/thirdparty/
+            </url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -41,8 +47,57 @@
       <groupId>com.google.android</groupId>
       <artifactId>android</artifactId>
       <version>4.4.2.3</version>
-      <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.google.android</groupId>
+      <artifactId>support-v4</artifactId>
+      <version>r7</version>
+    </dependency>
+    <dependency>
+      <groupId>com.goodow.realtime</groupId>
+      <artifactId>realtime-store</artifactId>
+      <version>${realtime.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.goodow.realtime</groupId>
+      <artifactId>realtime-android</artifactId>
+      <version>${realtime.version}</version>
+    </dependency>
+    <!-- Test -->
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>testtools</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-platform</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.roboguice</groupId>
+      <artifactId>roboguice</artifactId>
+      <version>3.0-alpha-2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>android.support</groupId>
+          <artifactId>compatibility-v4</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>android.support</groupId>
+          <artifactId>compatibility-v7-appcompat</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
   </dependencies>
   <build>
     <finalName>${project.artifactId}</finalName>
