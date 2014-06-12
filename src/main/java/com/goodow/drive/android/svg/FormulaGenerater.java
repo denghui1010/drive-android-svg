@@ -1,15 +1,14 @@
 package com.goodow.drive.android.svg;
 
-import com.goodow.drive.android.svg.graphics.BaseGraphic;
-import com.goodow.drive.android.svg.graphics.Ellipse;
+import com.goodow.drive.android.svg.graphics.MyBaseShape;
+import com.goodow.drive.android.svg.graphics.MyEllipse;
 
 /**
  * Created by liudenghui on 14-5-27.
  */
 public class FormulaGenerater {
-    private void addFormula(BaseGraphic info) {
-        if (info instanceof Ellipse) {
-
-        }
+  private void addFormula(MyBaseShape info) {
+    if (info instanceof MyEllipse) {
     }
+  }
 }

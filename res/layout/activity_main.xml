@@ -1,13 +1,60 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity" >
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
-    <ImageView
+    <com.goodow.drive.android.svg.MySurfaceView
         android:id="@+id/view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#ffffff"
         />
 
-</RelativeLayout>
+    <RadioGroup
+        android:id="@+id/rg_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rb_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择"/>
+
+        <RadioButton
+            android:id="@+id/rb_rect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="矩形"/>
+
+        <RadioButton
+            android:id="@+id/rb_oval"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="圆"/>
+
+        <RadioButton
+            android:id="@+id/rb_ellipse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="椭圆"/>
+
+        <RadioButton
+            android:id="@+id/rb_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="直线"/>
+
+        <RadioButton
+            android:id="@+id/rb_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="曲线"/>
+    </RadioGroup>
+
+</LinearLayout>

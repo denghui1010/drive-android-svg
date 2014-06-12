@@ -8,7 +8,6 @@ import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.java.JavaPlatform;
 import com.goodow.realtime.java.JavaWebSocket;
 import com.goodow.realtime.store.CollaborativeMap;
-import com.goodow.realtime.store.CollaborativeString;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
 import com.goodow.realtime.store.Store;
@@ -46,14 +45,12 @@ public class ServerStoreTest extends TestVerticle {
         Model mod = doc.getModel();
         CollaborativeMap root = mod.getRoot();
         log.info(root.toString());
-        VertxAssert.assertEquals("Larry Tin", root.<CollaborativeString> get("").getText());
         VertxAssert.testComplete();
       }
     }, new Handler<Model>() {
       @Override
       public void handle(Model mod) {
-        // CollaborativeString str = mod.createString("Larry Tin");
-        // mod.getRoot().set("name", str);
+
       }
     }, null);
   }

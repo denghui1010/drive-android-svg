@@ -26,22 +26,22 @@ import java.util.logging.Logger;
  * efficient means such as through injection directly into interested classes.
  */
 public final class StoreProvider {
-    private static final String SERVER = "realtime.goodow.com:1986";
+  private static final String SERVER = "realtime.goodow.com:1986";
 
-    static {
-        AndroidPlatform.register();
-        // adb shell setprop log.tag.JavaWebSocket DEBUG
-        Logger.getLogger(JavaWebSocket.class.getName()).setLevel(Level.ALL);
-    }
+  static {
+    AndroidPlatform.register();
+    // adb shell setprop log.tag.JavaWebSocket DEBUG
+    Logger.getLogger(JavaWebSocket.class.getName()).setLevel(Level.ALL);
+  }
 
-    private static final Store INSTANCE = new DefaultStore("ws://" + SERVER + "/channel/websocket",
-            null);
+  private static final Store INSTANCE = new DefaultStore("ws://" + SERVER + "/channel/websocket",
+                                                            null);
 
-    public static Store get() {
-        return INSTANCE;
-    }
+  public static Store get() {
+    return INSTANCE;
+  }
 
-    private StoreProvider() {
-        // No instances.
-    }
+  private StoreProvider() {
+    // No instances.
+  }
 }
