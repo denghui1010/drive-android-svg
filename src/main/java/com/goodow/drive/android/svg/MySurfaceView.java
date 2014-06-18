@@ -3,7 +3,6 @@ package com.goodow.drive.android.svg;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -15,6 +14,7 @@ import com.goodow.drive.android.svg.graphics.MyEllipse;
 import com.goodow.drive.android.svg.graphics.MyLine;
 import com.goodow.drive.android.svg.graphics.MyPath;
 import com.goodow.drive.android.svg.graphics.MyRect;
+import com.goodow.realtime.store.Document;
 
 import java.util.List;
 
@@ -38,7 +38,9 @@ public class MySurfaceView extends SurfaceView {
   }
 
   private SurfaceHolder mHolder;
+
   public static enum Select {RECT, ELLIPSE, OVAL, LINE, PATH, SWITCH}
+
   public static Select selectType;
   private DrawUtils mDrawUtils;
   private int startX;
@@ -49,12 +51,15 @@ public class MySurfaceView extends SurfaceView {
   private List<MyBaseShape> list;
   private ShapeSwitcher mShapeSwitcher;
   private boolean isCanDraw;
+  private Document doc;
 
   private SurfaceHolder.Callback mCallback = new SurfaceHolder.Callback() {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-      isCanDraw = true;
+      Canvas canvas = holder.lockCanvas();
+      canvas.drawColor(Color.WHITE);
+      holder.unlockCanvasAndPost(canvas);
     }
 
     @Override
@@ -69,8 +74,6 @@ public class MySurfaceView extends SurfaceView {
   private void init() {
     mHolder = getHolder();
     mHolder.addCallback(mCallback);
-    setZOrderOnTop(true);
-    mHolder.setFormat(PixelFormat.TRANSPARENT);
     mDrawUtils = new DrawUtils();
     list = mDrawUtils.getShapeList();
     mShapeSwitcher = new ShapeSwitcher(list);
@@ -78,6 +81,9 @@ public class MySurfaceView extends SurfaceView {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
+    if (!isCanDraw) {
+      return true;
+    }
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
         startX = (int) event.getX();
@@ -119,10 +125,12 @@ public class MySurfaceView extends SurfaceView {
           oval.setGraphicNum(0);
           int cenX = startX + dX / 2;
           int cenY = startY + dY / 2;
-          int r = (int)Math.sqrt((cenX-startX)*(cenX-startX)+(cenY-startY)*(cenY-startY));
+          int r = (int) Math.sqrt((cenX - startX) * (cenX - startX) + (cenY - startY) * (cenY - startY));
           oval.setCx(cenX);
           oval.setCy(cenY);
-          oval.getRectF().set(cenX-r, cenY-r, cenX+r, cenY+r);
+          oval.setRx(r);
+          oval.setRy(r);
+          oval.getRectF().set(cenX - r, cenY - r, cenX + r, cenY + r);
           oval.setFill(0);
           oval.setStroke(Color.CYAN);
           oval.setStroke_width(5);
@@ -133,6 +141,8 @@ public class MySurfaceView extends SurfaceView {
           myEllipse.setGraphicNum(0);
           myEllipse.setCx(startX + dX / 2);
           myEllipse.setCy(startY + dY / 2);
+          myEllipse.setRx(Math.abs(dX / 2));
+          myEllipse.setRy(Math.abs(dY / 2));
           myEllipse.getRectF().set(startX, startY, currentX, currentY);
           myEllipse.setFill(Color.YELLOW);
           myEllipse.setStroke(Color.RED);
@@ -167,6 +177,7 @@ public class MySurfaceView extends SurfaceView {
         break;
       case MotionEvent.ACTION_UP:
         list.add(graphic);
+        SaveUtils.saveGraphics(doc, graphic);
         if (selectType == Select.SWITCH) {
           mShapeSwitcher.switchShape(startX, startY, currentX, currentY);
           canvas = mHolder.lockCanvas();
@@ -180,12 +191,20 @@ public class MySurfaceView extends SurfaceView {
     return true;
   }
 
-  public List<MyBaseShape> getShapeList(){
+  public List<MyBaseShape> getShapeList() {
     return list;
   }
 
-  public boolean isCanDraw(){
+  public boolean isCanDraw() {
     return isCanDraw;
+  }
+
+  public void setCanDraw(boolean isCanDraw) {
+    this.isCanDraw = isCanDraw;
+  }
+
+  public void setDocument(Document doc) {
+    this.doc = doc;
   }
 
 }

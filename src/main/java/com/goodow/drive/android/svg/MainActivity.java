@@ -1,118 +1,220 @@
 package com.goodow.drive.android.svg;
 
-import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Menu;
-import android.view.WindowManager;
-import android.widget.RadioGroup;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.TranslateAnimation;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
 import com.goodow.realtime.core.Handler;
+import com.goodow.realtime.store.CollaborativeList;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
 import com.goodow.realtime.store.Store;
-import com.sun.xml.internal.ws.org.objectweb.asm.MethodVisitor;
 
 import java.util.List;
 
-import roboguice.inject.ContentView;
-
-@ContentView(R.layout.activity_main)
 public class MainActivity extends Activity {
-  private int screenWidth;
-  private int screenHeight;
 
   private Store store;
   private Document doc;
-  private static final String ID = "ldh/svg";
+  private static final String ID = "ldh/svg_test";
   private MySurfaceView mView;
+  private LeftMenuLayout ll_menu_root;
+  private RelativeLayout root;
+  private ListView listView;
+  private ProgressBar pb_progress;
+  private ActionBar actionBar;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu; this adds items to the action bar if it is present.
     getMenuInflater().inflate(R.menu.main, menu);
     return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+      case android.R.id.home:
+        if (!ll_menu_root.isLeftMenuShown()) {
+          ll_menu_root.showLeftMenu(listView.getWidth());
+        } else {
+          ll_menu_root.hideLeftMenu(listView.getWidth());
+        }
+        break;
+    }
+    return super.onOptionsItemSelected(item);
   }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setContentView(R.layout.activity_main);
     super.onCreate(savedInstanceState);
-    initView();
+    actionBar = getActionBar();
+    actionBar.setDisplayUseLogoEnabled(false);
+    actionBar.setDisplayHomeAsUpEnabled(false);
+    actionBar.setHomeButtonEnabled(true);
+    actionBar.setTitle("初始化中...");
     store = StoreProvider.get();
+    initView();
     loadDoc();
-    getScreenSize();
-  }
-
-  @SuppressLint("NewApi")
-  private void getScreenSize() {// 获得屏幕尺寸大小
-    if (android.os.Build.VERSION.SDK_INT < 17) {
-      DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-      screenWidth = displayMetrics.widthPixels;
-      screenHeight = displayMetrics.heightPixels;
-    } else {// api>17用新方式
-      WindowManager wm = this.getWindowManager();
-      DisplayMetrics outMetrics = new DisplayMetrics();
-      wm.getDefaultDisplay().getRealMetrics(outMetrics);
-      screenWidth = outMetrics.widthPixels;
-      screenHeight = outMetrics.heightPixels;
-    }
   }
 
   private void loadDoc() {
+    pb_progress.setVisibility(View.VISIBLE);
     Handler<Document> onLoadHandler = new Handler<Document>() {
       @Override
       public void handle(Document document) {
         doc = document;
+        pb_progress.setVisibility(View.INVISIBLE);
+        mView.setCanDraw(true);
+        mView.setDocument(doc);
+        actionBar.setTitle("画图工具箱");
       }
     };
     Handler<Model> initHandler = new Handler<Model>() {
       @Override
       public void handle(Model model) {
+        model.getRoot().set("data", model.createList(null));
       }
     };
-    store.load(ID, onLoadHandler, null, null);
+    store.load(ID, onLoadHandler, initHandler, null);
   }
 
   private void initView() {
+    root = (RelativeLayout) findViewById(R.id.root);
     mView = (MySurfaceView) findViewById(R.id.view);
-    mView.setZOrderOnTop(true);
-    RadioGroup rg_btn = (RadioGroup) findViewById(R.id.rg_btn);
-    rg_btn.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+    pb_progress = (ProgressBar) findViewById(R.id.pb_progress);
+    ll_menu_root = (LeftMenuLayout) findViewById(R.id.ll_menu_root);
+    listView = (ListView) findViewById(R.id.lv_menu_list);
+    listView.setAdapter(new MyAdapter());
+    listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
-      public void onCheckedChanged(RadioGroup group, int checkedId) {
-        switch (checkedId) {
-          case R.id.rb_switch:
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        switch (position) {
+          case 1:
             MySurfaceView.selectType = MySurfaceView.Select.SWITCH;
+            actionBar.setTitle("选择");
             break;
-          case R.id.rb_rect:
+          case 2:
             MySurfaceView.selectType = MySurfaceView.Select.RECT;
+            actionBar.setTitle("矩形");
             break;
-          case R.id.rb_oval:
+          case 3:
             MySurfaceView.selectType = MySurfaceView.Select.OVAL;
+            actionBar.setTitle("圆");
             break;
-          case R.id.rb_ellipse:
+          case 4:
             MySurfaceView.selectType = MySurfaceView.Select.ELLIPSE;
+            actionBar.setTitle("椭圆");
             break;
-          case R.id.rb_line:
+          case 5:
             MySurfaceView.selectType = MySurfaceView.Select.LINE;
+            actionBar.setTitle("直线");
             break;
-          case R.id.rb_path:
+          case 6:
             MySurfaceView.selectType = MySurfaceView.Select.PATH;
+            actionBar.setTitle("曲线");
             break;
         }
         cancelSelected();
+        ll_menu_root.hideLeftMenu(listView.getWidth());
       }
     });
   }
 
-  private void cancelSelected(){
+  private void cancelSelected() {
     List<MyBaseShape> list = mView.getShapeList();
     for (int i = 0; i < list.size(); i++) {
       MyBaseShape shape = list.get(i);
       shape.setSelected(false);
     }
+  }
+
+  class MyAdapter extends BaseAdapter {
+    private String[] opration = new String[]{"选择", "矩形", "圆", "椭圆", "线", "路径"};
+
+    @Override
+    public int getCount() {
+      return opration.length + 5;
+    }
+
+    @Override
+    public Object getItem(int position) {
+      return null;
+    }
+
+    @Override
+    public long getItemId(int position) {
+      return 0;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+      View view = null;
+      if (position == 0) {
+        TextView textView = new TextView(MainActivity.this);
+        textView.setText("操作");
+        textView.setTextSize(20);
+        textView.setPadding(20, 10, 0, 10);
+        textView.setBackgroundColor(Color.LTGRAY);
+        view = textView;
+      } else if (position < opration.length + 1) {
+        RadioButton radioButton = new RadioButton(MainActivity.this);
+        radioButton.setText(opration[position - 1]);
+        radioButton.setFocusable(false);
+        radioButton.setClickable(false);
+        view = radioButton;
+      } else if (position == opration.length + 1) {
+        TextView textView = new TextView(MainActivity.this);
+        textView.setTextSize(20);
+        textView.setPadding(20, 10, 0, 10);
+        textView.setBackgroundColor(Color.LTGRAY);
+        textView.setText("画笔");
+        view = textView;
+      } else if (position == opration.length + 2) {
+        TextView textView = new TextView(MainActivity.this);
+        textView.setText("画笔颜色");
+        textView.setTextSize(16);
+        textView.setPadding(20, 10, 0, 10);
+        view = textView;
+      } else if (position == opration.length + 3) {
+        TextView textView = new TextView(MainActivity.this);
+        textView.setText("画笔粗细");
+        textView.setTextSize(16);
+        textView.setPadding(20, 10, 0, 10);
+        view = textView;
+      } else if (position == opration.length + 4) {
+        TextView textView = new TextView(MainActivity.this);
+        textView.setText("填充颜色");
+        textView.setTextSize(16);
+        textView.setPadding(20, 10, 0, 10);
+        view = textView;
+      }
+      return view;
+    }
+  }
+
+  @Override
+  protected void onDestroy() {
+    if (doc != null) {
+      CollaborativeList data = doc.getModel().getRoot().get("data");
+      data.clear();
+      doc.close();
+    }
+    super.onDestroy();
   }
 }

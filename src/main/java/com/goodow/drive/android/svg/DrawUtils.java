@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.RectF;
 
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
@@ -13,12 +12,6 @@ import com.goodow.drive.android.svg.graphics.MyEllipse;
 import com.goodow.drive.android.svg.graphics.MyLine;
 import com.goodow.drive.android.svg.graphics.MyPath;
 import com.goodow.drive.android.svg.graphics.MyRect;
-import com.goodow.realtime.json.Json;
-import com.goodow.realtime.json.JsonArray;
-import com.goodow.realtime.store.CollaborativeList;
-import com.goodow.realtime.store.CollaborativeMap;
-import com.goodow.realtime.store.Document;
-import com.goodow.realtime.store.Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +22,6 @@ import java.util.List;
 public class DrawUtils {
   private Paint mPaint = new Paint();
   private Canvas mCanvas;
-  private Document doc;
   private DashPathEffect rectBounds;
   private Path mPath;
 
@@ -92,7 +84,7 @@ public class DrawUtils {
     mCanvas.save();
     mCanvas.rotate(myEllipse.getTransform(), myEllipse.getCx(), myEllipse.getCy());
     mPath.reset();
-    mPath.addOval(myEllipse.getRectF(), Path.Direction.CW);
+    mPath.addOval(new RectF(myEllipse.getCx() - myEllipse.getRx(), myEllipse.getCy() - myEllipse.getRy(), myEllipse.getCx() + myEllipse.getRx(), myEllipse.getCy() + myEllipse.getRy()), Path.Direction.CW);
     if (myEllipse.getStroke_width() > 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
@@ -218,85 +210,6 @@ public class DrawUtils {
     RectF rectF = new RectF();
     path.computeBounds(rectF, true);
     return rectF;
-  }
-
-  private void saveGraphics(GraphicType type, Point[] points, int... info) {
-    if (doc == null) {
-      return;
-    }
-    Model model = doc.getModel();
-    CollaborativeMap map = model.createMap(null);
-    switch (type) {
-      case RECT:
-//      int x, int y, int width, int height, int fill, int stroke, int stroke_width, int transform
-        if (info.length != 8) {
-          break;
-        }
-        map.set("x", info[0]);
-        map.set("y", info[1]);
-        map.set("width", info[2]);
-        map.set("height", info[3]);
-        map.set("fill", info[4]);
-        map.set("stroke", info[5]);
-        map.set("stroke_width", info[6]);
-        map.set("transform", info[7]);
-        model.getRoot().set("rect", map);
-        break;
-      case LINE:
-//      int x, int y, int sx, int sy, int fill, int stroke, int stroke_width, int transform
-        if (info.length != 8) {
-          break;
-        }
-        JsonArray array = Json.createArray();
-        JsonArray startPoint = Json.createArray();
-        JsonArray endPoint = Json.createArray();
-        startPoint.push(info[0]);
-        startPoint.push(info[1]);
-        endPoint.push(info[2]);
-        endPoint.push(info[3]);
-        array.push(Json.createArray().push(info[0]).push(info[1]));
-        array.push(Json.createArray().push(info[2]).push(info[3]));
-        CollaborativeList line = model.createList(array);
-        map.set("d", line);
-        map.set("fill", info[4]);
-        map.set("stroke", info[5]);
-        map.set("stroke_width", info[6]);
-        map.set("transform", info[7]);
-        model.getRoot().set("path", map);
-        break;
-      case PATH:
-//      int fill, int stroke, int stroke_width, int transform, Point... point
-        if (info.length != 4 || points.length == 0) {
-          break;
-        }
-        JsonArray pathArray = Json.createArray();
-        CollaborativeList path = model.createList(pathArray);
-        for (int i = 0; i < points.length; i++) {
-          pathArray.push(Json.createArray().push(points[i].x).push(points[i].y));
-        }
-        map.set("d", path);
-        map.set("fill", info[0]);
-        map.set("stroke", info[1]);
-        map.set("stroke_width", info[2]);
-        map.set("transform", info[3]);
-        model.getRoot().set("path", map);
-        break;
-      case ELLIPSE:
-//      int cx, int cy, int rx, int ry, int fill, int stroke, int stroke_width, int transform
-        if (info.length != 8) {
-          break;
-        }
-        map.set("cx", info[0]);
-        map.set("cy", info[1]);
-        map.set("rx", info[2]);
-        map.set("ry", info[3]);
-        map.set("fill", info[4]);
-        map.set("stroke", info[5]);
-        map.set("stroke_width", info[6]);
-        map.set("transform", info[7]);
-        model.getRoot().set("ellipse", map);
-        break;
-    }
   }
 
   public void setCanvas(Canvas mCanvas) {

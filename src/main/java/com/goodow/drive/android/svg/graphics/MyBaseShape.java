@@ -2,10 +2,6 @@ package com.goodow.drive.android.svg.graphics;
 
 import android.graphics.RectF;
 
-import com.goodow.drive.android.svg.MySurfaceView;
-
-import sun.font.TrueTypeFont;
-
 /**
  * Created by liudenghui on 14-5-27.
  */
@@ -23,7 +19,6 @@ public class MyBaseShape {
   }
 
   public void setSelected(boolean isSelected) {
-
     this.isSelected = isSelected;
   }
 
@@ -68,7 +63,7 @@ public class MyBaseShape {
   }
 
   public boolean containsShape(RectF rectF) {
-    if(rectF.contains(bounds)){
+    if (rectF.contains(bounds)) {
       return true;
     }
     return false;

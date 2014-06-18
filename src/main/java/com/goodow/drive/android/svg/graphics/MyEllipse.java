@@ -8,6 +8,25 @@ import android.graphics.RectF;
 public class MyEllipse extends MyBaseShape {
   private int cx;
   private int cy;
+  private int rx;
+  private int ry;
+
+  public int getRx() {
+    return rx;
+  }
+
+  public void setRx(int rx) {
+    this.rx = rx;
+  }
+
+  public int getRy() {
+    return ry;
+  }
+
+  public void setRy(int ry) {
+    this.ry = ry;
+  }
+
   private RectF rectF = new RectF();
 
   public int getCx() {
