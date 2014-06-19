@@ -16,6 +16,7 @@
         android:theme="@style/AppTheme" >
 
         <activity
+            android:theme="@style/ActionBarNoLogoNoHome"
             android:name="com.goodow.drive.android.svg.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>

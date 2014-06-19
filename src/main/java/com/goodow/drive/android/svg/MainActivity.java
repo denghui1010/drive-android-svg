@@ -8,9 +8,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
@@ -33,10 +33,10 @@ public class MainActivity extends Activity {
   private static final String ID = "ldh/svg_test";
   private MySurfaceView mView;
   private LeftMenuLayout ll_menu_root;
-  private RelativeLayout root;
   private ListView listView;
   private ProgressBar pb_progress;
   private ActionBar actionBar;
+  private ImageView iv_btn;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -49,9 +49,9 @@ public class MainActivity extends Activity {
     switch (item.getItemId()) {
       case android.R.id.home:
         if (!ll_menu_root.isLeftMenuShown()) {
-          ll_menu_root.showLeftMenu(listView.getWidth());
+          ll_menu_root.showLeftMenu();
         } else {
-          ll_menu_root.hideLeftMenu(listView.getWidth());
+          ll_menu_root.hideLeftMenu();
         }
         break;
     }
@@ -62,11 +62,6 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     setContentView(R.layout.activity_main);
     super.onCreate(savedInstanceState);
-    actionBar = getActionBar();
-    actionBar.setDisplayUseLogoEnabled(false);
-    actionBar.setDisplayHomeAsUpEnabled(false);
-    actionBar.setHomeButtonEnabled(true);
-    actionBar.setTitle("初始化中...");
     store = StoreProvider.get();
     initView();
     loadDoc();
@@ -94,52 +89,28 @@ public class MainActivity extends Activity {
   }
 
   private void initView() {
-    root = (RelativeLayout) findViewById(R.id.root);
     mView = (MySurfaceView) findViewById(R.id.view);
     pb_progress = (ProgressBar) findViewById(R.id.pb_progress);
     ll_menu_root = (LeftMenuLayout) findViewById(R.id.ll_menu_root);
+    iv_btn = (ImageView) findViewById(R.id.iv_btn);
+    ll_menu_root.setControlButton(iv_btn);
+    actionBar = getActionBar();
+    actionBar.setDisplayHomeAsUpEnabled(true);
+    actionBar.setDisplayShowHomeEnabled(false);
+    MyDrawable myDrawable = new MyDrawable(getResources().getDrawable(R.drawable.menu));
+    actionBar.setHomeAsUpIndicator(myDrawable);
+    myDrawable.setmOffset(0.5f);
+    actionBar.setTitle("初始化中...");
+    ll_menu_root.setActionBarDrawable(myDrawable);
     listView = (ListView) findViewById(R.id.lv_menu_list);
     listView.setAdapter(new MyAdapter());
     listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override
-      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        switch (position) {
-          case 1:
-            MySurfaceView.selectType = MySurfaceView.Select.SWITCH;
-            actionBar.setTitle("选择");
-            break;
-          case 2:
-            MySurfaceView.selectType = MySurfaceView.Select.RECT;
-            actionBar.setTitle("矩形");
-            break;
-          case 3:
-            MySurfaceView.selectType = MySurfaceView.Select.OVAL;
-            actionBar.setTitle("圆");
-            break;
-          case 4:
-            MySurfaceView.selectType = MySurfaceView.Select.ELLIPSE;
-            actionBar.setTitle("椭圆");
-            break;
-          case 5:
-            MySurfaceView.selectType = MySurfaceView.Select.LINE;
-            actionBar.setTitle("直线");
-            break;
-          case 6:
-            MySurfaceView.selectType = MySurfaceView.Select.PATH;
-            actionBar.setTitle("曲线");
-            break;
-        }
-        cancelSelected();
-        ll_menu_root.hideLeftMenu(listView.getWidth());
-      }
-    });
+    listView.setOnItemClickListener(new ListViewOnItemClickListener());
   }
 
   private void cancelSelected() {
     List<MyBaseShape> list = mView.getShapeList();
-    for (int i = 0; i < list.size(); i++) {
-      MyBaseShape shape = list.get(i);
+    for(MyBaseShape shape : list){
       shape.setSelected(false);
     }
   }
@@ -205,6 +176,41 @@ public class MainActivity extends Activity {
         view = textView;
       }
       return view;
+    }
+  }
+
+  class ListViewOnItemClickListener implements AdapterView.OnItemClickListener {
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      switch (position) {
+        case 1:
+          MySurfaceView.selectType = MySurfaceView.Select.SWITCH;
+          actionBar.setTitle("选择");
+          break;
+        case 2:
+          MySurfaceView.selectType = MySurfaceView.Select.RECT;
+          actionBar.setTitle("矩形");
+          break;
+        case 3:
+          MySurfaceView.selectType = MySurfaceView.Select.OVAL;
+          actionBar.setTitle("圆");
+          break;
+        case 4:
+          MySurfaceView.selectType = MySurfaceView.Select.ELLIPSE;
+          actionBar.setTitle("椭圆");
+          break;
+        case 5:
+          MySurfaceView.selectType = MySurfaceView.Select.LINE;
+          actionBar.setTitle("直线");
+          break;
+        case 6:
+          MySurfaceView.selectType = MySurfaceView.Select.PATH;
+          actionBar.setTitle("曲线");
+          break;
+      }
+      cancelSelected();
+      ll_menu_root.hideLeftMenu();
     }
   }
 

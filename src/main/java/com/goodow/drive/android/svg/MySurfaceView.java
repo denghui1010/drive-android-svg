@@ -176,8 +176,10 @@ public class MySurfaceView extends SurfaceView {
         mHolder.unlockCanvasAndPost(canvas);
         break;
       case MotionEvent.ACTION_UP:
-        list.add(graphic);
-        SaveUtils.saveGraphics(doc, graphic);
+        if(graphic != null){
+          list.add(graphic);
+          SaveUtils.saveGraphics(doc, graphic);
+        }
         if (selectType == Select.SWITCH) {
           mShapeSwitcher.switchShape(startX, startY, currentX, currentY);
           canvas = mHolder.lockCanvas();

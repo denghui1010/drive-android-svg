@@ -17,4 +17,8 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
+    <style name="ActionBarNoLogoNoHome" parent="AppTheme">
+        <item name="android:displayOptions">showTitle</item>
+    </style>
+
 </resources>
