@@ -1,18 +1,28 @@
-package com.goodow.drive.android.svg;
+package com.goodow.drive.android.svg.view;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.Scroller;
 
 /**
  * Created by liudenghui on 14-6-18.
  */
 public class LeftMenuLayout extends LinearLayout {
+
+  private Scroller mScroller;
+  private MyDrawable mDrawable;
+  private View mButton;
+  private int menuState;
+  public static final int FLING2RIGHT = 3;
+  public static final int FLING2LEFT = 2;
+  public static final int SHOW = 1;
+  public static final int HIDE = 0;
+  private int mWidth;
 
   public LeftMenuLayout(Context context) {
     super(context);
@@ -29,63 +39,61 @@ public class LeftMenuLayout extends LinearLayout {
     init(context);
   }
 
-  private Scroller mScroller;
-  private MyDrawable mDrawable;
-  private View mButton;
-  private View mListView;
-  private int menuState;
-  public static final int FLING2RIGHT = 3;
-  public static final int FLING2LEFT = 2;
-  public static final int SHOW = 1;
-  public static final int HIDE = 0;
-  private int mWidth;
+  @Override
+  protected void onDraw(Canvas canvas) {
+    float position = -getScrollX() / (float) mWidth;
+    canvas.drawARGB((int) (100 * position), 0, 0, 0);
+    super.onDraw(canvas);
+  }
 
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    mListView = getChildAt(0);
+    View mListView = getChildAt(0);
     mWidth = mListView.getWidth();
-      mListView.setDrawingCacheEnabled(true);
-      mListView.setDrawingCacheQuality(DRAWING_CACHE_QUALITY_LOW);
+    mListView.setDrawingCacheEnabled(true);
+    mListView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+
   }
 
   @Override
   public void computeScroll() {
     if (mScroller.computeScrollOffset()) {
-      scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+      scrollTo(mScroller.getCurrX(), 0);
       synAction();
       invalidate();
     } else {
-      if(menuState == FLING2LEFT){
+      if (menuState == FLING2LEFT) {
         menuState = HIDE;
-      } else if(menuState == FLING2RIGHT) {
+      } else if (menuState == FLING2RIGHT) {
         menuState = SHOW;
       }
     }
   }
 
   private void init(Context context) {
-    mScroller = new Scroller(context);
-    this.setAlwaysDrawnWithCacheEnabled(true);
-
+    DecelerateInterpolator decelerateInterpolator = new DecelerateInterpolator();
+    mScroller = new Scroller(context, decelerateInterpolator);
   }
 
 
-
-  private void synAction(){
+  private void synAction() {
+    if(mDrawable == null){
+      return;
+    }
     float position = -getScrollX() / (float) mWidth;
     mDrawable.setPosition(position);
-//    setBackgroundColor(Color.argb((int) (100 * position), 0, 0, 0));
+
   }
 
   public void showLeftMenu() {
-    mScroller.startScroll(getScrollX(), 0, -mWidth, 0, 350);
+    mScroller.startScroll(getScrollX(), 0, -mWidth, 0);
     menuState = FLING2RIGHT;
     invalidate();
   }
 
   public void hideLeftMenu() {
-    mScroller.startScroll(getScrollX(), 0, mWidth, 0, 350);
+    mScroller.startScroll(getScrollX(), 0, mWidth, 0);
     menuState = FLING2LEFT;
     invalidate();
   }
@@ -98,28 +106,28 @@ public class LeftMenuLayout extends LinearLayout {
     mDrawable = myDrawable;
   }
 
-  public void setControlButton(View view){
+  public void setControlButton(View view) {
     mButton = view;
     view.setOnTouchListener(new ButtonOntoucListener());
   }
 
-  class ButtonOntoucListener implements OnTouchListener{
+  class ButtonOntoucListener implements OnTouchListener {
 
     private int startX;
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-
-      switch (event.getAction()){
+      switch (event.getAction()) {
         case MotionEvent.ACTION_DOWN:
           startX = (int) event.getRawX();
           break;
         case MotionEvent.ACTION_MOVE:
           int currX = (int) event.getRawX();
           int dX = currX - startX;
-          if(-getScrollX()+dX<0){
-            scrollTo(0,0);
-          } else if( -getScrollX()+dX > mWidth){
-            scrollTo(-mWidth,0);
+          if (-getScrollX() + dX < 0) {
+            scrollTo(0, 0);
+          } else if (-getScrollX() + dX > mWidth) {
+            scrollTo(-mWidth, 0);
           } else {
             scrollBy(-dX, 0);
           }
@@ -127,16 +135,14 @@ public class LeftMenuLayout extends LinearLayout {
           startX = currX;
           break;
         case MotionEvent.ACTION_UP:
-          if(menuState == HIDE) {
+          if (menuState == HIDE) {
             menuState = FLING2RIGHT;
-//            mScroller.startScroll(getScrollX(), 0, -mWidth-getScrollX(), 0, 500);
-            mScroller.fling(getScrollX(), 0, 20, 0,-200,-400,0,0);
-            invalidate();
-          } else if(menuState == SHOW) {
+            mScroller.startScroll(getScrollX(), 0, -mWidth - getScrollX(), 0, 300);
+          } else if (menuState == SHOW) {
             menuState = FLING2LEFT;
-            mScroller.startScroll(getScrollX(), 0, -getScrollX(), 0, 500);
-            invalidate();
+            mScroller.startScroll(getScrollX(), 0, -getScrollX(), 0, 300);
           }
+          invalidate();
           break;
       }
       return true;

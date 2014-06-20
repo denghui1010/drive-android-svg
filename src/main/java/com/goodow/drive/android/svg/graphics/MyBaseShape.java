@@ -1,18 +1,30 @@
 package com.goodow.drive.android.svg.graphics;
 
 import android.graphics.RectF;
+import android.view.View;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 /**
  * Created by liudenghui on 14-5-27.
  */
 public class MyBaseShape {
-  protected int graphicNum;
+  protected String type;
   protected int fill;
   protected int stroke;
   protected int stroke_width;
   protected int transform;
   protected boolean isSelected;
   protected RectF bounds;
+  protected View popupMenuBtn;
+
+  public View getPopupMenuBtn() {
+    return popupMenuBtn;
+  }
+
+  public void setPopupMenuBtn(View popupMenuBtn) {
+    this.popupMenuBtn = popupMenuBtn;
+  }
 
   public boolean isSelected() {
     return isSelected;
@@ -22,12 +34,12 @@ public class MyBaseShape {
     this.isSelected = isSelected;
   }
 
-  public int getGraphicNum() {
-    return graphicNum;
+  public String getType() {
+    return type;
   }
 
-  public void setGraphicNum(int graphicNum) {
-    this.graphicNum = graphicNum;
+  public void setType(String type) {
+    this.type = type;
   }
 
   public int getStroke() {
@@ -71,5 +83,9 @@ public class MyBaseShape {
 
   public void setBounds(RectF bounds) {
     this.bounds = bounds;
+  }
+
+  public RectF getBounds() {
+    return bounds;
   }
 }

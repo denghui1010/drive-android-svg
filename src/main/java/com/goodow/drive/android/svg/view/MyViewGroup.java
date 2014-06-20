@@ -1,4 +1,4 @@
-package com.goodow.drive.android.svg;
+package com.goodow.drive.android.svg.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

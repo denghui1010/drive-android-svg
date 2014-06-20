@@ -1,42 +1,84 @@
 package com.goodow.drive.android.svg;
 
+import android.annotation.TargetApi;
 import android.app.ActionBar;
-import android.app.Activity;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.RectF;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
+import com.goodow.drive.android.svg.utils.DrawUtil;
+import com.goodow.drive.android.svg.utils.ParseUtil;
+import com.goodow.drive.android.svg.utils.SwitchUtil;
+import com.goodow.drive.android.svg.view.LeftMenuLayout;
+import com.goodow.drive.android.svg.view.MyDrawable;
+import com.goodow.drive.android.svg.view.MySurfaceView;
 import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.store.CollaborativeList;
+import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
 import com.goodow.realtime.store.Store;
+import com.google.inject.Inject;
 
-import java.util.List;
+import java.awt.Image;
+import java.util.Map;
+import java.util.Set;
 
-public class MainActivity extends Activity {
+import roboguice.activity.RoboActivity;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;
 
+@ContentView(R.layout.activity_main)
+public class MainActivity extends RoboActivity {
+
+  @Inject
   private Store store;
   private Document doc;
-  private static final String ID = "ldh/svg_test";
-  private MySurfaceView mView;
+  private static final String ID = "ldh/test";
+  @InjectView(R.id.view)
+  private MySurfaceView mySurfaceView;
+  @InjectView(R.id.ll_menu_root)
   private LeftMenuLayout ll_menu_root;
+  @InjectView(R.id.lv_menu_list)
   private ListView listView;
+  @InjectView(R.id.pb_progress)
   private ProgressBar pb_progress;
-  private ActionBar actionBar;
+  @InjectView(R.id.iv_btn)
   private ImageView iv_btn;
+  @InjectView(R.id.surfaceview_root)
+  private FrameLayout surfaceview_root;
+  private ActionBar actionBar;
+
+  @Inject
+  private DrawUtil drawUtil;
+  @Inject
+  private ParseUtil parseUtil;
+  @Inject
+  private SwitchUtil switchUtil;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -59,11 +101,28 @@ public class MainActivity extends Activity {
   }
 
   @Override
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    if (keyCode == KeyEvent.KEYCODE_MENU) {
+      if (!ll_menu_root.isLeftMenuShown()) {
+        ll_menu_root.showLeftMenu();
+      } else {
+        ll_menu_root.hideLeftMenu();
+      }
+      return true;
+    } else if (keyCode == KeyEvent.KEYCODE_BACK) {
+      if (ll_menu_root.isLeftMenuShown()) {
+        ll_menu_root.hideLeftMenu();
+        return true;
+      }
+    }
+    return super.onKeyDown(keyCode, event);
+  }
+
+  @Override
   protected void onCreate(Bundle savedInstanceState) {
-    setContentView(R.layout.activity_main);
     super.onCreate(savedInstanceState);
-    store = StoreProvider.get();
     initView();
+    initUtils();
     loadDoc();
   }
 
@@ -74,8 +133,8 @@ public class MainActivity extends Activity {
       public void handle(Document document) {
         doc = document;
         pb_progress.setVisibility(View.INVISIBLE);
-        mView.setCanDraw(true);
-        mView.setDocument(doc);
+        mySurfaceView.setCanDraw(true);
+        mySurfaceView.setDocument(doc);
         actionBar.setTitle("画图工具箱");
       }
     };
@@ -88,32 +147,101 @@ public class MainActivity extends Activity {
     store.load(ID, onLoadHandler, initHandler, null);
   }
 
+
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
   private void initView() {
-    mView = (MySurfaceView) findViewById(R.id.view);
-    pb_progress = (ProgressBar) findViewById(R.id.pb_progress);
-    ll_menu_root = (LeftMenuLayout) findViewById(R.id.ll_menu_root);
-    iv_btn = (ImageView) findViewById(R.id.iv_btn);
     ll_menu_root.setControlButton(iv_btn);
     actionBar = getActionBar();
     actionBar.setDisplayHomeAsUpEnabled(true);
     actionBar.setDisplayShowHomeEnabled(false);
-//    actionBar.setHomeButtonEnabled(true);
-    MyDrawable myDrawable = new MyDrawable(getResources().getDrawable(R.drawable.menu));
-    actionBar.setHomeAsUpIndicator(myDrawable);
-    myDrawable.setmOffset(0.5f);
+    if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2) {
+      MyDrawable myDrawable = new MyDrawable(getResources().getDrawable(R.drawable.menu));
+      actionBar.setHomeAsUpIndicator(myDrawable);
+      myDrawable.setmOffset(0.5f);
+      ll_menu_root.setActionBarDrawable(myDrawable);
+    }
     actionBar.setTitle("初始化中...");
-    ll_menu_root.setActionBarDrawable(myDrawable);
-    listView = (ListView) findViewById(R.id.lv_menu_list);
     listView.setAdapter(new MyAdapter());
     listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     listView.setOnItemClickListener(new ListViewOnItemClickListener());
   }
 
+  private void initUtils(){
+    mySurfaceView.setUtils(drawUtil, switchUtil, parseUtil);
+    switchUtil.setOnSelectedListener(new OnSelectedChangeListener() {
+      @Override
+      public void onSelectedChange(MyBaseShape shape) {
+        if(shape.isSelected()){
+          showPopup(shape);
+        } else {
+          hidePopup(shape);
+        }
+      }
+    });
+  }
+
   private void cancelSelected() {
-    List<MyBaseShape> list = mView.getShapeList();
-    for(MyBaseShape shape : list){
-      shape.setSelected(false);
-    }
+    switchUtil.switchShape(drawUtil.getShapeList(), 0, 0, 0, 0);
+    mySurfaceView.updateShapes();
+  }
+
+  private void showPopup(final MyBaseShape shape){
+    RectF bounds = shape.getBounds();
+    final TextView textView = new TextView(this);
+    textView.setBackgroundColor(Color.LTGRAY);
+    textView.setTextSize(14);
+    textView.setText("编辑");
+    textView.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        switchUtil.switchShape(drawUtil.getShapeList(), (int) shape.getBounds().left, (int) shape.getBounds().top, (int) shape.getBounds().right, (int) shape.getBounds().bottom);
+        mySurfaceView.updateShapes();
+        PopupMenu popupMenu = new PopupMenu(MainActivity.this, textView);
+        Menu menu = popupMenu.getMenu();
+        popupMenu.getMenuInflater().inflate(R.menu.popup_menu, menu);
+        popupMenu.show();
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+          @Override
+          public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()){
+              case R.id.popup_move:
+                textView.setText("移动");
+                MySurfaceView.selectType = MySurfaceView.Select.MOVE;
+                mySurfaceView.setShape2mvoe(shape);
+                break;
+              case R.id.popup_rotate:
+                textView.setText("旋转");
+                MySurfaceView.selectType = MySurfaceView.Select.ROTATE;
+                break;
+              case R.id.popup_delete:
+                hidePopup(shape);
+                deleteShape(shape);
+                break;
+            }
+            return false;
+          }
+        });
+      }
+    });
+    FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    layoutParams.gravity = Gravity.BOTTOM|Gravity.RIGHT;
+    layoutParams.bottomMargin = mySurfaceView.getHeight()-(int)bounds.top;
+    layoutParams.rightMargin = mySurfaceView.getWidth()-(int)bounds.right;
+    surfaceview_root.addView(textView, layoutParams);
+    shape.setPopupMenuBtn(textView);
+  }
+
+  private void deleteShape(MyBaseShape shape){
+    int i = drawUtil.getShapeList().indexOf(shape);
+    drawUtil.getShapeList().remove(i);
+    drawUtil.getCollList().remove(i);
+    CollaborativeList data = doc.getModel().getRoot().get("data");
+    data.remove(i);
+    mySurfaceView.updateShapes();
+  }
+
+  private void hidePopup(MyBaseShape shape){
+    surfaceview_root.removeView(shape.getPopupMenuBtn());
   }
 
   class MyAdapter extends BaseAdapter {
@@ -218,8 +346,8 @@ public class MainActivity extends Activity {
   @Override
   protected void onDestroy() {
     if (doc != null) {
-      CollaborativeList data = doc.getModel().getRoot().get("data");
-      data.clear();
+//      CollaborativeList data = doc.getModel().getRoot().get("data");
+//      data.clear();
       doc.close();
     }
     super.onDestroy();

@@ -1,4 +1,4 @@
-package com.goodow.drive.android.svg;
+package com.goodow.drive.android.svg.view;
 
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;

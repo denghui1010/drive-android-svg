@@ -16,7 +16,10 @@ package com.goodow.drive.android.svg;
 import com.goodow.realtime.android.AndroidPlatform;
 import com.goodow.realtime.java.JavaWebSocket;
 import com.goodow.realtime.store.Store;
-import com.goodow.realtime.store.impl.DefaultStore;
+import com.goodow.realtime.store.impl.StoreImpl;
+import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +28,7 @@ import java.util.logging.Logger;
  * Maintains a singleton instance for obtaining the bus. Ideally this would be replaced with a more
  * efficient means such as through injection directly into interested classes.
  */
-public final class StoreProvider {
+public class DriveAndroidSvgModule extends AbstractModule {
   private static final String SERVER = "realtime.goodow.com:1986";
 
   static {
@@ -34,14 +37,14 @@ public final class StoreProvider {
     Logger.getLogger(JavaWebSocket.class.getName()).setLevel(Level.ALL);
   }
 
-  private static final Store INSTANCE = new DefaultStore("ws://" + SERVER + "/channel/websocket",
-                                                            null);
-
-  public static Store get() {
-    return INSTANCE;
+  @Override
+  protected void configure() {
   }
 
-  private StoreProvider() {
-    // No instances.
+  @Provides
+  @Singleton
+  Store provideStore() {
+    return new StoreImpl("ws://" + SERVER + "/channel/websocket", null);
   }
+
 }
