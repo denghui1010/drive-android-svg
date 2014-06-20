@@ -97,6 +97,7 @@ public class MainActivity extends Activity {
     actionBar = getActionBar();
     actionBar.setDisplayHomeAsUpEnabled(true);
     actionBar.setDisplayShowHomeEnabled(false);
+//    actionBar.setHomeButtonEnabled(true);
     MyDrawable myDrawable = new MyDrawable(getResources().getDrawable(R.drawable.menu));
     actionBar.setHomeAsUpIndicator(myDrawable);
     myDrawable.setmOffset(0.5f);
