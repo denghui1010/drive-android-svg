@@ -5,10 +5,11 @@
     android:layout_height="match_parent">
 
     <FrameLayout
+        android:id="@+id/surfaceview_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.goodow.drive.android.svg.MySurfaceView
+        <com.goodow.drive.android.svg.view.MySurfaceView
             android:id="@+id/view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -26,7 +27,7 @@
 
     </FrameLayout>
 
-    <com.goodow.drive.android.svg.LeftMenuLayout
+    <com.goodow.drive.android.svg.view.LeftMenuLayout
         android:background="#00000000"
         android:id="@+id/ll_menu_root"
         android:layout_width="match_parent"
@@ -48,6 +49,6 @@
             android:layout_height="50dp"
             android:layout_gravity="center_vertical"
             android:background="#cccccc"/>
-    </com.goodow.drive.android.svg.LeftMenuLayout>
+    </com.goodow.drive.android.svg.view.LeftMenuLayout>
 
 </RelativeLayout>

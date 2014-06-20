@@ -7,11 +7,12 @@ package com.goodow.drive.android.svg;
 import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.java.JavaPlatform;
 import com.goodow.realtime.java.JavaWebSocket;
+import com.goodow.realtime.store.CollaborativeList;
 import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
 import com.goodow.realtime.store.Store;
-import com.goodow.realtime.store.impl.DefaultStore;
+import com.goodow.realtime.store.impl.StoreImpl;
 
 import org.junit.Test;
 import org.vertx.testtools.TestVerticle;
@@ -33,18 +34,22 @@ public class ServerStoreTest extends TestVerticle {
     initialize();
     JavaPlatform.register();
     Logger.getLogger(JavaWebSocket.class.getName()).setLevel(Level.ALL);
-    store = new DefaultStore("ws://realtime.goodow.com:1986/channel/websocket", null);
+    store = new StoreImpl("ws://realtime.goodow.com:1986/channel/websocket", null);
     startTests();
   }
 
   @Test
   public void test() {
-    store.load("ldh/svg", new Handler<Document>() {
+    store.load("ldh/test", new Handler<Document>() {
       @Override
       public void handle(Document doc) {
         Model mod = doc.getModel();
         CollaborativeMap root = mod.getRoot();
-        log.info(root.toString());
+        CollaborativeList list = root.get("data");
+        CollaborativeMap map = list.get(0);
+        map.set("cx", 300);
+//        list.clear();
+        log.info(list.toString());
         VertxAssert.testComplete();
       }
     }, new Handler<Model>() {

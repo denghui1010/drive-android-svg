@@ -1,4 +1,4 @@
-package com.goodow.drive.android.svg;
+package com.goodow.drive.android.svg.utils;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,6 +12,8 @@ import com.goodow.drive.android.svg.graphics.MyEllipse;
 import com.goodow.drive.android.svg.graphics.MyLine;
 import com.goodow.drive.android.svg.graphics.MyPath;
 import com.goodow.drive.android.svg.graphics.MyRect;
+import com.goodow.realtime.store.CollaborativeMap;
+import com.google.inject.Singleton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,17 +21,18 @@ import java.util.List;
 /**
  * Created by liudenghui on 14-6-4.
  */
-public class DrawUtils {
+
+@Singleton
+public class DrawUtil {
   private Paint mPaint = new Paint();
   private Canvas mCanvas;
   private DashPathEffect rectBounds;
   private Path mPath;
+  private List<MyBaseShape> shapeList = new ArrayList<MyBaseShape>();
+  private List<CollaborativeMap> collList = new ArrayList<CollaborativeMap>();
 
-  private enum GraphicType {RECT, LINE, ELLIPSE, PATH}
 
-  private List<MyBaseShape> list = new ArrayList<MyBaseShape>(); //要绘制的图形集合
-
-  public DrawUtils() {
+  public DrawUtil() {
     rectBounds = new DashPathEffect(new float[]{3, 12, 12, 24}, 0);
     mPath = new Path();
   }
@@ -106,7 +109,6 @@ public class DrawUtils {
       drawRectBounds(rectF);
     }
     mCanvas.restore();
-//  saveGraphics(GraphicType.ELLIPSE, null, cx, cy, rx, ry, fill, stroke, stroke_width, transform);
   }
 
   public void drawLine(MyLine myLine) {
@@ -139,7 +141,6 @@ public class DrawUtils {
       drawRectBounds(rectF);
     }
     mCanvas.restore();
-//  saveGraphics(GraphicType.LINE, null, x, y, sx, sy, fill, stroke, stroke_width, transform);
   }
 
   public void drawPath(MyPath myPath) {
@@ -182,8 +183,7 @@ public class DrawUtils {
   }
 
   public void drawAll() {
-    for (int i = 0; i < list.size(); i++) {
-      MyBaseShape graphic = list.get(i);
+    for(MyBaseShape graphic : shapeList){
       if (graphic instanceof MyRect) {
         drawRect((MyRect) graphic);
       } else if (graphic instanceof MyEllipse) {
@@ -216,7 +216,11 @@ public class DrawUtils {
     this.mCanvas = mCanvas;
   }
 
-  public List<MyBaseShape> getShapeList() {
-    return list;
+  public List<MyBaseShape> getShapeList(){
+    return shapeList;
+  }
+
+  public List<CollaborativeMap> getCollList(){
+    return collList;
   }
 }
