@@ -8,7 +8,6 @@ import com.goodow.drive.android.svg.graphics.MyEllipse;
 import com.goodow.drive.android.svg.graphics.MyLine;
 import com.goodow.drive.android.svg.graphics.MyPath;
 import com.goodow.drive.android.svg.graphics.MyRect;
-import com.goodow.drive.android.svg.view.MySurfaceView;
 import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.json.Json;
 import com.goodow.realtime.json.JsonArray;
@@ -17,11 +16,9 @@ import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
 import com.goodow.realtime.store.ObjectChangedEvent;
-import com.goodow.realtime.store.ValueChangedEvent;
 import com.google.inject.Singleton;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by liudenghui on 14-6-16.
@@ -73,7 +70,9 @@ public class ParseUtil {
     map.onObjectChanged(new Handler<ObjectChangedEvent>() {
       @Override
       public void handle(ObjectChangedEvent objectChangedEvent) {
-        listener.onRemoteChange(map);
+        if(!objectChangedEvent.isLocal()) {
+          listener.onRemoteChange(map);
+        }
       }
     });
     data.push(map);
@@ -89,7 +88,9 @@ public class ParseUtil {
       map.onObjectChanged(new Handler<ObjectChangedEvent>() {
         @Override
         public void handle(ObjectChangedEvent objectChangedEvent) {
-          listener.onRemoteChange(map);
+          if(!objectChangedEvent.isLocal()) {
+            listener.onRemoteChange(map);
+          }
         }
       });
     }

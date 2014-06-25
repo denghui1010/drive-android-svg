@@ -10,4 +10,7 @@
     <item
         android:id="@+id/popup_delete"
         android:title="删除"/>
+    <item
+        android:id="@+id/popup_cancel"
+        android:title="取消编辑"/>
 </menu>

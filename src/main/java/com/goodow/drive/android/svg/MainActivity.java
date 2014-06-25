@@ -215,7 +215,7 @@ public class MainActivity extends RoboActivity {
                 break;
               case R.id.popup_delete:
                 hidePopup(shape);
-                deleteShape(shape);
+                mySurfaceView.deleteShape(shape);
                 break;
             }
             return false;
@@ -229,15 +229,6 @@ public class MainActivity extends RoboActivity {
     layoutParams.rightMargin = mySurfaceView.getWidth()-(int)bounds.right;
     surfaceview_root.addView(textView, layoutParams);
     shape.setPopupMenuBtn(textView);
-  }
-
-  private void deleteShape(MyBaseShape shape){
-    int i = drawUtil.getShapeList().indexOf(shape);
-    drawUtil.getShapeList().remove(i);
-    drawUtil.getCollList().remove(i);
-    CollaborativeList data = doc.getModel().getRoot().get("data");
-    data.remove(i);
-    mySurfaceView.updateShapes();
   }
 
   private void hidePopup(MyBaseShape shape){

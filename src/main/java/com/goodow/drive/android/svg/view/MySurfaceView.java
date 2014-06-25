@@ -9,7 +9,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.TextView;
 
 import com.goodow.drive.android.svg.OnRemoteChangeListener;
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
@@ -20,13 +19,17 @@ import com.goodow.drive.android.svg.graphics.MyRect;
 import com.goodow.drive.android.svg.utils.DrawUtil;
 import com.goodow.drive.android.svg.utils.ParseUtil;
 import com.goodow.drive.android.svg.utils.SwitchUtil;
+import com.goodow.realtime.core.Handler;
+import com.goodow.realtime.json.Json;
+import com.goodow.realtime.json.JsonArray;
+import com.goodow.realtime.json.JsonObject;
+import com.goodow.realtime.store.CollaborativeList;
 import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
+import com.goodow.realtime.store.ValuesAddedEvent;
+import com.goodow.realtime.store.ValuesRemovedEvent;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * 用于绘图的surfaceview
@@ -229,6 +232,37 @@ public class MySurfaceView extends SurfaceView {
     this.doc = doc;
     mParseUtil.parseDoc2map(doc, collList, shapeList);
     updateShapes();
+    final CollaborativeList data = doc.getModel().getRoot().get("data");
+    data.onValuesAdded(new Handler<ValuesAddedEvent>() {
+      @Override
+      public void handle(ValuesAddedEvent valuesAddedEvent) {
+        if(!valuesAddedEvent.isLocal()){
+          JsonArray values = valuesAddedEvent.values();
+          for(int i=0; i<values.length(); i++){
+            CollaborativeMap map = values.get(i);
+            MyBaseShape shape = mParseUtil.parseCmap2shape(map);
+            shapeList.add(shape);
+            collList.add(map);
+            updateShapes();
+          }
+        }
+      }
+    });
+    data.onValuesRemoved(new Handler<ValuesRemovedEvent>() {
+      @Override
+      public void handle(ValuesRemovedEvent valuesRemovedEvent) {
+        if(!valuesRemovedEvent.isLocal()){
+          JsonArray values = valuesRemovedEvent.values();
+          for (int i=0; i<values.length(); i++){
+            CollaborativeMap map = values.get(i);
+            int j = collList.indexOf(map);
+            collList.remove(j);
+            shapeList.remove(j);
+            updateShapes();
+          }
+        }
+      }
+    });
   }
 
   public void updateShapes() {
@@ -254,7 +288,7 @@ public class MySurfaceView extends SurfaceView {
         currentY = (int) event.getY();
         int dX = currentX - startX;
         int dY = currentY - startY;
-        translatePoint(dX, dY);
+        translateMyBaseShape(dX, dY);
         View popupMenuBtn = currShape.getPopupMenuBtn();
         popupMenuBtn.layout(popupMenuBtn.getLeft()+dX, popupMenuBtn.getTop()+dY, popupMenuBtn.getRight()+dX, popupMenuBtn.getBottom()+dY);
         updateShapes();
@@ -262,16 +296,70 @@ public class MySurfaceView extends SurfaceView {
         startY = currentY;
         break;
       case MotionEvent.ACTION_UP:
+        translateCollMap();
+        updateShapes();
         break;
     }
   }
 
-  private void translatePoint(int dX, int dY){
+  private void translateMyBaseShape(int dX, int dY){
     if(currShape instanceof MyEllipse){
       MyEllipse myEllipse = (MyEllipse) currShape;
       myEllipse.setCx(myEllipse.getCx() + dX);
       myEllipse.setCy(myEllipse.getCy() + dY);
+    } else if(currShape instanceof MyRect) {
+      MyRect myRect = (MyRect) currShape;
+      myRect.setX(myRect.getX() + dX );
+      myRect.setY(myRect.getY() + dY );
+    } else if(currShape instanceof MyLine){
+      MyLine myLine = (MyLine) currShape;
+      myLine.setX(myLine.getX() + dX);
+      myLine.setY(myLine.getY() + dY);
+      myLine.setSx(myLine.getSx() + dX);
+      myLine.setSy(myLine.getSy() + dY);
+    } else if(currShape instanceof MyPath){
+      MyPath myPath = (MyPath) currShape;
+      List<Point> points = myPath.getPoints();
+      for (Point point : points){
+        point.set(point.x+dX,point.y+dY);
+      }
     }
+  }
+
+  private void translateCollMap(){
+    int i = shapeList.indexOf(currShape);
+    CollaborativeMap collaborativeMap = collList.get(i);
+    if(currShape instanceof MyEllipse){
+      MyEllipse myEllipse = (MyEllipse) currShape;
+      collaborativeMap.set("cx", myEllipse.getCx());
+      collaborativeMap.set("cy", myEllipse.getCy());
+    } else if(currShape instanceof MyRect) {
+      MyRect myRect = (MyRect) currShape;
+      collaborativeMap.set("x", myRect.getX());
+      collaborativeMap.set("y", myRect.getY());
+    } else if(currShape instanceof MyLine){
+      MyLine myLine = (MyLine) currShape;
+      collaborativeMap.set("x", myLine.getX());
+      collaborativeMap.set("y", myLine.getY());
+      collaborativeMap.set("sx", myLine.getSx());
+      collaborativeMap.set("sy", myLine.getSy());
+    } else if(currShape instanceof MyPath){
+      MyPath myPath = (MyPath) currShape;
+      CollaborativeList d = collaborativeMap.get("d");
+      d.clear();
+      for (int j = 0; j < myPath.getPoints().size(); j++) {
+        d.push(Json.createArray().push(myPath.getPoints().get(j).x).push(myPath.getPoints().get(j).y));
+      }
+    }
+  }
+
+  public void deleteShape(MyBaseShape shape) {
+    int i = shapeList.indexOf(shape);
+    shapeList.remove(i);
+    collList.remove(i);
+    CollaborativeList data = doc.getModel().getRoot().get("data");
+    data.remove(i);
+    updateShapes();
   }
 
 }
