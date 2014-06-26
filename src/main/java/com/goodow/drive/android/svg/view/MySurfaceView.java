@@ -4,11 +4,14 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.goodow.drive.android.svg.OnRemoteChangeListener;
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
@@ -22,7 +25,6 @@ import com.goodow.drive.android.svg.utils.SwitchUtil;
 import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.json.Json;
 import com.goodow.realtime.json.JsonArray;
-import com.goodow.realtime.json.JsonObject;
 import com.goodow.realtime.store.CollaborativeList;
 import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
@@ -58,6 +60,7 @@ public class MySurfaceView extends SurfaceView {
   public static Select selectType;
   private int startX;
   private int startY;
+  private int startTransform;
   private int currentX;
   private int currentY;
   private MyBaseShape graphic;
@@ -98,8 +101,16 @@ public class MySurfaceView extends SurfaceView {
     if (!isCanDraw) {
       return true;
     }
-    if(selectType == Select.MOVE){
+    if (selectType == Select.MOVE) {
       moveShape(event);
+      return true;
+    }
+    if (selectType == Select.ROTATE) {
+      rotateShape(event);
+      return true;
+    }
+    if (selectType == Select.SWITCH) {
+      switchShape(event);
       return true;
     }
     switch (event.getAction()) {
@@ -121,27 +132,21 @@ public class MySurfaceView extends SurfaceView {
         } else {
           graphic = null;
         }
+        if (graphic != null) {
+          shapeList.add(graphic);
+        }
         break;
       case MotionEvent.ACTION_MOVE:
         currentX = (int) event.getX();
         currentY = (int) event.getY();
         int dX = currentX - startX;
         int dY = currentY - startY;
-        Canvas canvas = mHolder.lockCanvas();
-        canvas.drawColor(Color.WHITE);
-        mDrawUtil.setCanvas(canvas);
-        mDrawUtil.drawAll();
         if (selectType == Select.RECT) {
           MyRect myRect = (MyRect) graphic;
           myRect.setX(startX);
           myRect.setY(startY);
           myRect.setWidth(dX);
           myRect.setHeight(dY);
-          myRect.setFill(0);
-          myRect.setStroke(Color.BLUE);
-          myRect.setStroke_width(2);
-          myRect.setTransform(0);
-          mDrawUtil.drawRect(myRect);
         } else if (selectType == Select.OVAL) {
           MyEllipse oval = (MyEllipse) graphic;
           int cenX = startX + dX / 2;
@@ -152,11 +157,6 @@ public class MySurfaceView extends SurfaceView {
           oval.setRx(r);
           oval.setRy(r);
           oval.getRectF().set(cenX - r, cenY - r, cenX + r, cenY + r);
-          oval.setFill(0);
-          oval.setStroke(Color.CYAN);
-          oval.setStroke_width(5);
-          oval.setTransform(0);
-          mDrawUtil.drawEllipse(oval);
         } else if (selectType == Select.ELLIPSE) {
           MyEllipse myEllipse = (MyEllipse) graphic;
           myEllipse.setCx(startX + dX / 2);
@@ -164,45 +164,29 @@ public class MySurfaceView extends SurfaceView {
           myEllipse.setRx(Math.abs(dX / 2));
           myEllipse.setRy(Math.abs(dY / 2));
           myEllipse.getRectF().set(startX, startY, currentX, currentY);
-          myEllipse.setFill(Color.YELLOW);
-          myEllipse.setStroke(Color.RED);
-          myEllipse.setStroke_width(5);
-          myEllipse.setTransform(0);
-          mDrawUtil.drawEllipse(myEllipse);
         } else if (selectType == Select.LINE) {
           MyLine myLine = (MyLine) graphic;
           myLine.setX(startX);
           myLine.setY(startY);
           myLine.setSx(startX + dX);
           myLine.setSy(startY + dY);
-          myLine.setFill(0);
-          myLine.setStroke(Color.RED);
-          myLine.setStroke_width(3);
-          myLine.setTransform(0);
-          mDrawUtil.drawLine(myLine);
         } else if (selectType == Select.PATH) {
           MyPath myPath = (MyPath) graphic;
           Point point = new Point();
           point.set((int) event.getX(), (int) event.getY());
           myPath.addPoint(point);
-          myPath.setFill(0);
-          myPath.setStroke(Color.RED);
-          myPath.setStroke_width(3);
-          myPath.setTransform(0);
-          mDrawUtil.drawPath(myPath);
-        } else if (selectType == Select.SWITCH) {
-          mDrawUtil.drawDashRect(startX, startY, currentX, currentY);
         }
-        mHolder.unlockCanvasAndPost(canvas);
+        if (graphic != null) {
+          graphic.setFill(0);
+          graphic.setStroke(Color.RED);
+          graphic.setStroke_width(3);
+          graphic.setTransform(0);
+          updateShapes();
+        }
         break;
       case MotionEvent.ACTION_UP:
         if (graphic != null) {
-          shapeList.add(graphic);
           collList.add(mParseUtil.parseShape2cmap(doc, graphic));
-        }
-        if (selectType == Select.SWITCH) {
-          mSwitchUtil.switchShape(shapeList, startX, startY, currentX, currentY);
-          updateShapes();
         }
         break;
     }
@@ -222,7 +206,7 @@ public class MySurfaceView extends SurfaceView {
     parseUtil.setOnRemoteChangeListener(new OnRemoteChangeListener() {
       @Override
       public void onRemoteChange(CollaborativeMap map) {
-        shapeList.set(collList.indexOf(map), mParseUtil.parseCmap2shape(map));
+        mParseUtil.parseCmap2shape(map, shapeList.get(collList.indexOf(map)));
         updateShapes();
       }
     });
@@ -236,9 +220,9 @@ public class MySurfaceView extends SurfaceView {
     data.onValuesAdded(new Handler<ValuesAddedEvent>() {
       @Override
       public void handle(ValuesAddedEvent valuesAddedEvent) {
-        if(!valuesAddedEvent.isLocal()){
+        if (!valuesAddedEvent.isLocal()) {
           JsonArray values = valuesAddedEvent.values();
-          for(int i=0; i<values.length(); i++){
+          for (int i = 0; i < values.length(); i++) {
             CollaborativeMap map = values.get(i);
             MyBaseShape shape = mParseUtil.parseCmap2shape(map);
             shapeList.add(shape);
@@ -251,11 +235,14 @@ public class MySurfaceView extends SurfaceView {
     data.onValuesRemoved(new Handler<ValuesRemovedEvent>() {
       @Override
       public void handle(ValuesRemovedEvent valuesRemovedEvent) {
-        if(!valuesRemovedEvent.isLocal()){
+        if (!valuesRemovedEvent.isLocal()) {
           JsonArray values = valuesRemovedEvent.values();
-          for (int i=0; i<values.length(); i++){
+          for (int i = 0; i < values.length(); i++) {
             CollaborativeMap map = values.get(i);
             int j = collList.indexOf(map);
+            MyBaseShape shape = shapeList.get(j);
+            ((ViewGroup)MySurfaceView.this.getParent()).removeView(shape.getPopupMenuBtn());
+            shape.setPopupMenuBtn(null);
             collList.remove(j);
             shapeList.remove(j);
             updateShapes();
@@ -273,12 +260,35 @@ public class MySurfaceView extends SurfaceView {
     mHolder.unlockCanvasAndPost(canvas);
   }
 
-  public void setShape2mvoe(MyBaseShape shape){
+  public void setCurrentShape(MyBaseShape shape) {
     currShape = shape;
   }
 
-  private void moveShape(MotionEvent event){
-    switch (event.getAction()){
+  private void switchShape(MotionEvent event) {
+    switch (event.getAction()) {
+      case MotionEvent.ACTION_DOWN:
+        startX = (int) event.getX();
+        startY = (int) event.getY();
+        break;
+      case MotionEvent.ACTION_MOVE:
+        currentX = (int) event.getX();
+        currentY = (int) event.getY();
+        Canvas canvas = mHolder.lockCanvas();
+        mDrawUtil.setCanvas(canvas);
+        canvas.drawColor(Color.WHITE);
+        mDrawUtil.drawAll();
+        mDrawUtil.drawDashRect(startX, startY, currentX, currentY);
+        mHolder.unlockCanvasAndPost(canvas);
+        break;
+      case MotionEvent.ACTION_UP:
+        mSwitchUtil.switchShape(shapeList, startX, startY, currentX, currentY);
+        updateShapes();
+        break;
+    }
+  }
+
+  private void moveShape(MotionEvent event) {
+    switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
         startX = (int) event.getX();
         startY = (int) event.getY();
@@ -290,60 +300,90 @@ public class MySurfaceView extends SurfaceView {
         int dY = currentY - startY;
         translateMyBaseShape(dX, dY);
         View popupMenuBtn = currShape.getPopupMenuBtn();
-        popupMenuBtn.layout(popupMenuBtn.getLeft()+dX, popupMenuBtn.getTop()+dY, popupMenuBtn.getRight()+dX, popupMenuBtn.getBottom()+dY);
+        RectF bounds = currShape.getBounds();
+        FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) popupMenuBtn.getLayoutParams();
+        layoutParams.bottomMargin = getHeight() - (int) bounds.top + dY;
+        layoutParams.rightMargin = getWidth() - (int) bounds.right + dX;
+        popupMenuBtn.setLayoutParams(layoutParams);
         updateShapes();
         startX = currentX;
         startY = currentY;
         break;
       case MotionEvent.ACTION_UP:
         translateCollMap();
-        updateShapes();
         break;
     }
   }
 
-  private void translateMyBaseShape(int dX, int dY){
-    if(currShape instanceof MyEllipse){
+  private void rotateShape(MotionEvent event) {
+    switch (event.getAction()) {
+      case MotionEvent.ACTION_DOWN:
+        startX = (int) event.getX();
+        startY = (int) event.getY();
+        startTransform = currShape.getTransform();
+        break;
+      case MotionEvent.ACTION_MOVE:
+        currentX = (int) event.getX();
+        currentY = (int) event.getY();
+        RectF bounds = currShape.getBounds();
+        float centerX = bounds.centerX();
+        float centerY = bounds.centerY();
+        double d = Math.atan((double) (currentY - centerY) / (currentX - centerX));
+        double s = Math.atan((double) (startY - centerY) / (startX - centerX));
+        int degrees = (int) Math.toDegrees(d - s);
+        currShape.setTransform((startTransform + degrees) % 360);
+        updateShapes();
+        break;
+      case MotionEvent.ACTION_UP:
+        int i = shapeList.indexOf(currShape);
+        CollaborativeMap collaborativeMap = collList.get(i);
+        collaborativeMap.set("transform", currShape.getTransform());
+        break;
+    }
+  }
+
+  private void translateMyBaseShape(int dX, int dY) {
+    if (currShape instanceof MyEllipse) {
       MyEllipse myEllipse = (MyEllipse) currShape;
       myEllipse.setCx(myEllipse.getCx() + dX);
       myEllipse.setCy(myEllipse.getCy() + dY);
-    } else if(currShape instanceof MyRect) {
+    } else if (currShape instanceof MyRect) {
       MyRect myRect = (MyRect) currShape;
-      myRect.setX(myRect.getX() + dX );
-      myRect.setY(myRect.getY() + dY );
-    } else if(currShape instanceof MyLine){
+      myRect.setX(myRect.getX() + dX);
+      myRect.setY(myRect.getY() + dY);
+    } else if (currShape instanceof MyLine) {
       MyLine myLine = (MyLine) currShape;
       myLine.setX(myLine.getX() + dX);
       myLine.setY(myLine.getY() + dY);
       myLine.setSx(myLine.getSx() + dX);
       myLine.setSy(myLine.getSy() + dY);
-    } else if(currShape instanceof MyPath){
+    } else if (currShape instanceof MyPath) {
       MyPath myPath = (MyPath) currShape;
       List<Point> points = myPath.getPoints();
-      for (Point point : points){
-        point.set(point.x+dX,point.y+dY);
+      for (Point point : points) {
+        point.set(point.x + dX, point.y + dY);
       }
     }
   }
 
-  private void translateCollMap(){
+  private void translateCollMap() {
     int i = shapeList.indexOf(currShape);
     CollaborativeMap collaborativeMap = collList.get(i);
-    if(currShape instanceof MyEllipse){
+    if (currShape instanceof MyEllipse) {
       MyEllipse myEllipse = (MyEllipse) currShape;
       collaborativeMap.set("cx", myEllipse.getCx());
       collaborativeMap.set("cy", myEllipse.getCy());
-    } else if(currShape instanceof MyRect) {
+    } else if (currShape instanceof MyRect) {
       MyRect myRect = (MyRect) currShape;
       collaborativeMap.set("x", myRect.getX());
       collaborativeMap.set("y", myRect.getY());
-    } else if(currShape instanceof MyLine){
+    } else if (currShape instanceof MyLine) {
       MyLine myLine = (MyLine) currShape;
       collaborativeMap.set("x", myLine.getX());
       collaborativeMap.set("y", myLine.getY());
       collaborativeMap.set("sx", myLine.getSx());
       collaborativeMap.set("sy", myLine.getSy());
-    } else if(currShape instanceof MyPath){
+    } else if (currShape instanceof MyPath) {
       MyPath myPath = (MyPath) currShape;
       CollaborativeList d = collaborativeMap.get("d");
       d.clear();

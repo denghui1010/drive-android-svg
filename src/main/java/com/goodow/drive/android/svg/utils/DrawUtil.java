@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 
+import com.goodow.drive.android.svg.OnShowPopupListener;
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
 import com.goodow.drive.android.svg.graphics.MyEllipse;
 import com.goodow.drive.android.svg.graphics.MyLine;
@@ -30,6 +31,7 @@ public class DrawUtil {
   private Path mPath;
   private List<MyBaseShape> shapeList = new ArrayList<MyBaseShape>();
   private List<CollaborativeMap> collList = new ArrayList<CollaborativeMap>();
+  private OnShowPopupListener onShowPopupListener;
 
 
   public DrawUtil() {
@@ -193,6 +195,7 @@ public class DrawUtil {
       } else if (graphic instanceof MyLine) {
         drawLine((MyLine) graphic);
       }
+      onShowPopupListener.onSelectedChange(graphic);
     }
   }
 
@@ -222,5 +225,9 @@ public class DrawUtil {
 
   public List<CollaborativeMap> getCollList(){
     return collList;
+  }
+
+  public void setOnShowPopupListener(OnShowPopupListener onShowPopupListener){
+    this.onShowPopupListener = onShowPopupListener;
   }
 }

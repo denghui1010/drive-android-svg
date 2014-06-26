@@ -97,10 +97,15 @@ public class ParseUtil {
   }
 
   public MyBaseShape parseCmap2shape(CollaborativeMap map){
-    MyBaseShape shape;
+    return parseCmap2shape(map,null);
+  }
+
+  public MyBaseShape parseCmap2shape(CollaborativeMap map, MyBaseShape shape){
     String type = map.get("type");
     if (type.equals("rect")) {
-      shape = new MyRect();
+      if (shape == null) {
+        shape = new MyRect();
+      }
       MyRect myRect = (MyRect) shape;
       Double x = map.get("x");
       Double y = map.get("y");
@@ -111,7 +116,9 @@ public class ParseUtil {
       myRect.setWidth(width.intValue());
       myRect.setHeight(height.intValue());
     } else if (type.equals("line")) {
-      shape = new MyLine();
+      if (shape == null) {
+        shape = new MyLine();
+      }
       MyLine myLine = (MyLine) shape;
       CollaborativeList d = map.get("d");
       JsonArray start = d.get(0);
@@ -125,7 +132,9 @@ public class ParseUtil {
       myLine.setSx(stopX.intValue());
       myLine.setSy(stopY.intValue());
     } else if (type.equals("path")) {
-      shape = new MyPath();
+      if (shape == null) {
+        shape = new MyPath();
+      }
       MyPath myPath = (MyPath) shape;
       CollaborativeList d = map.get("d");
       for (int j = 0; j < d.length(); j++) {
@@ -133,7 +142,9 @@ public class ParseUtil {
         myPath.addPoint(new Point((int) point.getNumber(0), (int) point.getNumber(1)));
       }
     } else if (type.equals("ellipse")) {
-      shape = new MyEllipse();
+      if (shape == null) {
+        shape = new MyEllipse();
+      }
       MyEllipse myEllipse = (MyEllipse) shape;
       Double cx = map.get("cx");
       Double cy = map.get("cy");

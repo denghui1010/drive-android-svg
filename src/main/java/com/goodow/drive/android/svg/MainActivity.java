@@ -2,31 +2,25 @@ package com.goodow.drive.android.svg;
 
 import android.annotation.TargetApi;
 import android.app.ActionBar;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
@@ -37,16 +31,10 @@ import com.goodow.drive.android.svg.view.LeftMenuLayout;
 import com.goodow.drive.android.svg.view.MyDrawable;
 import com.goodow.drive.android.svg.view.MySurfaceView;
 import com.goodow.realtime.core.Handler;
-import com.goodow.realtime.store.CollaborativeList;
-import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
 import com.goodow.realtime.store.Store;
 import com.google.inject.Inject;
-
-import java.awt.Image;
-import java.util.Map;
-import java.util.Set;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.ContentView;
@@ -59,17 +47,17 @@ public class MainActivity extends RoboActivity {
   private Store store;
   private Document doc;
   private static final String ID = "ldh/test";
-  @InjectView(R.id.view)
+//  @InjectView(R.id.view)
   private MySurfaceView mySurfaceView;
-  @InjectView(R.id.ll_menu_root)
+//  @InjectView(R.id.ll_menu_root)
   private LeftMenuLayout ll_menu_root;
-  @InjectView(R.id.lv_menu_list)
+//  @InjectView(R.id.lv_menu_list)
   private ListView listView;
-  @InjectView(R.id.pb_progress)
+//  @InjectView(R.id.pb_progress)
   private ProgressBar pb_progress;
-  @InjectView(R.id.iv_btn)
+//  @InjectView(R.id.iv_btn)
   private ImageView iv_btn;
-  @InjectView(R.id.surfaceview_root)
+//  @InjectView(R.id.surfaceview_root)
   private FrameLayout surfaceview_root;
   private ActionBar actionBar;
 
@@ -114,6 +102,12 @@ public class MainActivity extends RoboActivity {
         ll_menu_root.hideLeftMenu();
         return true;
       }
+      if(MySurfaceView.selectType == MySurfaceView.Select.MOVE|| MySurfaceView.selectType == MySurfaceView.Select.ROTATE){
+        cancelSelected();
+        MySurfaceView.selectType = MySurfaceView.Select.SWITCH;
+        actionBar.setTitle("选择");
+        return true;
+      }
     }
     return super.onKeyDown(keyCode, event);
   }
@@ -150,6 +144,12 @@ public class MainActivity extends RoboActivity {
 
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
   private void initView() {
+    mySurfaceView = (MySurfaceView) findViewById(R.id.view);
+    ll_menu_root = (LeftMenuLayout) findViewById(R.id.ll_menu_root);
+    listView = (ListView) findViewById(R.id.lv_menu_list);
+    pb_progress = (ProgressBar) findViewById(R.id.pb_progress);
+    iv_btn = (ImageView) findViewById(R.id.iv_btn);
+    surfaceview_root = (FrameLayout) findViewById(R.id.surfaceview_root);
     ll_menu_root.setControlButton(iv_btn);
     actionBar = getActionBar();
     actionBar.setDisplayHomeAsUpEnabled(true);
@@ -168,12 +168,21 @@ public class MainActivity extends RoboActivity {
 
   private void initUtils(){
     mySurfaceView.setUtils(drawUtil, switchUtil, parseUtil);
-    switchUtil.setOnSelectedListener(new OnSelectedChangeListener() {
+    drawUtil.setOnShowPopupListener(new OnShowPopupListener() {
       @Override
       public void onSelectedChange(MyBaseShape shape) {
-        if(shape.isSelected()){
-          showPopup(shape);
-        } else {
+        View popupMenuBtn = shape.getPopupMenuBtn();
+        if (shape.isSelected()) {
+          if (popupMenuBtn == null) {
+            showPopup(shape);
+          } else {
+            RectF bounds = shape.getBounds();
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) popupMenuBtn.getLayoutParams();
+            layoutParams.bottomMargin = mySurfaceView.getHeight() - (int) bounds.top;
+            layoutParams.rightMargin = mySurfaceView.getWidth() - (int) bounds.right;
+            popupMenuBtn.setLayoutParams(layoutParams);
+          }
+        } else if (!shape.isSelected() && shape.getPopupMenuBtn() != null) {
           hidePopup(shape);
         }
       }
@@ -194,6 +203,7 @@ public class MainActivity extends RoboActivity {
     textView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
+        mySurfaceView.setCurrentShape(shape);
         switchUtil.switchShape(drawUtil.getShapeList(), (int) shape.getBounds().left, (int) shape.getBounds().top, (int) shape.getBounds().right, (int) shape.getBounds().bottom);
         mySurfaceView.updateShapes();
         PopupMenu popupMenu = new PopupMenu(MainActivity.this, textView);
@@ -207,15 +217,21 @@ public class MainActivity extends RoboActivity {
               case R.id.popup_move:
                 textView.setText("移动");
                 MySurfaceView.selectType = MySurfaceView.Select.MOVE;
-                mySurfaceView.setShape2mvoe(shape);
+                actionBar.setTitle("移动");
                 break;
               case R.id.popup_rotate:
                 textView.setText("旋转");
                 MySurfaceView.selectType = MySurfaceView.Select.ROTATE;
+                actionBar.setTitle("旋转");
                 break;
               case R.id.popup_delete:
                 hidePopup(shape);
                 mySurfaceView.deleteShape(shape);
+                break;
+              case R.id.popup_cancel:
+                textView.setText("编辑");
+                MySurfaceView.selectType = MySurfaceView.Select.SWITCH;
+                actionBar.setTitle("选择");
                 break;
             }
             return false;
@@ -233,6 +249,7 @@ public class MainActivity extends RoboActivity {
 
   private void hidePopup(MyBaseShape shape){
     surfaceview_root.removeView(shape.getPopupMenuBtn());
+    shape.setPopupMenuBtn(null);
   }
 
   class MyAdapter extends BaseAdapter {
@@ -337,10 +354,9 @@ public class MainActivity extends RoboActivity {
   @Override
   protected void onDestroy() {
     if (doc != null) {
-//      CollaborativeList data = doc.getModel().getRoot().get("data");
-//      data.clear();
       doc.close();
     }
     super.onDestroy();
+    android.os.Process.killProcess(android.os.Process.myPid());
   }
 }

@@ -2,8 +2,6 @@ package com.goodow.drive.android.svg.graphics;
 
 import android.graphics.RectF;
 import android.view.View;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 
 /**
  * Created by liudenghui on 14-5-27.
@@ -17,6 +15,10 @@ public class MyBaseShape {
   protected boolean isSelected;
   protected RectF bounds;
   protected View popupMenuBtn;
+
+  public MyBaseShape(){
+
+  }
 
   public View getPopupMenuBtn() {
     return popupMenuBtn;
@@ -88,4 +90,5 @@ public class MyBaseShape {
   public RectF getBounds() {
     return bounds;
   }
+
 }

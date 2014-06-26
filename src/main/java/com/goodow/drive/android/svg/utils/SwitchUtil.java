@@ -2,21 +2,16 @@ package com.goodow.drive.android.svg.utils;
 
 import android.graphics.RectF;
 
-import com.goodow.drive.android.svg.OnSelectedChangeListener;
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
-import com.goodow.realtime.store.CollaborativeMap;
 import com.google.inject.Singleton;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by liudenghui on 14-5-27.
  */
 @Singleton
 public class SwitchUtil {
-  private OnSelectedChangeListener listener;
 
   public void switchShape(List<MyBaseShape> shapeList, int left, int top, int right, int bottom) {
     for (MyBaseShape shape : shapeList) {
@@ -28,10 +23,8 @@ public class SwitchUtil {
       }
       if(!shape.isSelected() && isContains){
         shape.setSelected(true);
-        listener.onSelectedChange(shape);
       } else if(shape.isSelected() && !isContains){
         shape.setSelected(false);
-        listener.onSelectedChange(shape);
       }
     }
   }
@@ -40,10 +33,6 @@ public class SwitchUtil {
     RectF rectF = new RectF();
     rectF.set(left, top, right, bottom);
     return rectF;
-  }
-
-  public void setOnSelectedListener(OnSelectedChangeListener listener){
-    this.listener = listener;
   }
 
 }
