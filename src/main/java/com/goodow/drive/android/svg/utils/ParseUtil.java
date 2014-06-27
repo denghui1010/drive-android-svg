@@ -50,10 +50,10 @@ public class ParseUtil {
     } else if (shape instanceof MyPath) {
       MyPath path = (MyPath) shape;
       JsonArray pathArray = Json.createArray();
-      CollaborativeList list = model.createList(pathArray);
       for (int i = 0; i < path.getPoints().size(); i++) {
         pathArray.push(Json.createArray().push(path.getPoints().get(i).x).push(path.getPoints().get(i).y));
       }
+      CollaborativeList list = model.createList(pathArray);
       map.set("d", list);
     } else if (shape instanceof MyEllipse) {
       MyEllipse ellipse = (MyEllipse) shape;
@@ -83,16 +83,16 @@ public class ParseUtil {
     CollaborativeList data = doc.getModel().getRoot().get("data");
     for(int i=0; i<data.length(); i++){
       final CollaborativeMap map = data.get(i);
-      shapeList.add(parseCmap2shape(map));
-      collList.add(map);
       map.onObjectChanged(new Handler<ObjectChangedEvent>() {
         @Override
         public void handle(ObjectChangedEvent objectChangedEvent) {
-          if(!objectChangedEvent.isLocal()) {
+          if (!objectChangedEvent.isLocal()) {
             listener.onRemoteChange(map);
           }
         }
       });
+      shapeList.add(parseCmap2shape(map));
+      collList.add(map);
     }
   }
 
@@ -137,6 +137,7 @@ public class ParseUtil {
       }
       MyPath myPath = (MyPath) shape;
       CollaborativeList d = map.get("d");
+      myPath.getPoints().clear();
       for (int j = 0; j < d.length(); j++) {
         JsonArray point = d.get(j);
         myPath.addPoint(new Point((int) point.getNumber(0), (int) point.getNumber(1)));

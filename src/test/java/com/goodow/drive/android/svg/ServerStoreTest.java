@@ -48,7 +48,7 @@ public class ServerStoreTest extends TestVerticle {
         CollaborativeList list = root.get("data");
 //        CollaborativeMap map = list.get(0);
 //        map.set("cx", 300);
-//        list.clear();
+        list.clear();
         log.info(list.toString());
         VertxAssert.testComplete();
       }

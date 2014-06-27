@@ -1,0 +1,22 @@
+---
+data: 
+  - path: # http://www.w3.org/TR/SVG/
+      d: [[1,5], [2,20]] # [1,5],[2,20]是JsonArray,两个点表示线段,多个表示曲线
+      --- &base #每个图形都有的基本信息
+      fill: -16776961 # bule(0xFF0000FF)十进制-16776961
+      stroke: -16776961
+      stroke-width: 3 # 单位px
+      rotate: 30 # 顺时针旋转30度
+  - rect:
+      x: 1 # 矩形左上角x轴坐标
+      y: 1 # 矩形左上角y轴坐标
+      width: 398 # 矩形宽度
+      height: 398 # 矩形高度
+      <<: *base
+  - ellipse:
+      cx: 1 # 椭圆/圆x轴坐标
+      cy: 1 # 椭圆/圆y轴坐标
+      rx: 30 # 椭圆半长抽
+      ry: 30 # 椭圆半短轴 rx=ry时图形是圆,半径=rx=ry
+      <<: *base
+...

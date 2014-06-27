@@ -28,6 +28,7 @@ import com.goodow.realtime.json.JsonArray;
 import com.goodow.realtime.store.CollaborativeList;
 import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
+import com.goodow.realtime.store.ObjectChangedEvent;
 import com.goodow.realtime.store.ValuesAddedEvent;
 import com.goodow.realtime.store.ValuesRemovedEvent;
 
@@ -223,7 +224,16 @@ public class MySurfaceView extends SurfaceView {
         if (!valuesAddedEvent.isLocal()) {
           JsonArray values = valuesAddedEvent.values();
           for (int i = 0; i < values.length(); i++) {
-            CollaborativeMap map = values.get(i);
+            final CollaborativeMap map = values.get(i);
+            map.onObjectChanged(new Handler<ObjectChangedEvent>() {
+              @Override
+              public void handle(ObjectChangedEvent objectChangedEvent) {
+                if (!objectChangedEvent.isLocal()) {
+                  mParseUtil.parseCmap2shape(map, shapeList.get(collList.indexOf(map)));
+                  updateShapes();
+                }
+              }
+            });
             MyBaseShape shape = mParseUtil.parseCmap2shape(map);
             shapeList.add(shape);
             collList.add(map);
@@ -241,7 +251,7 @@ public class MySurfaceView extends SurfaceView {
             CollaborativeMap map = values.get(i);
             int j = collList.indexOf(map);
             MyBaseShape shape = shapeList.get(j);
-            ((ViewGroup)MySurfaceView.this.getParent()).removeView(shape.getPopupMenuBtn());
+            ((ViewGroup) MySurfaceView.this.getParent()).removeView(shape.getPopupMenuBtn());
             shape.setPopupMenuBtn(null);
             collList.remove(j);
             shapeList.remove(j);
@@ -379,10 +389,10 @@ public class MySurfaceView extends SurfaceView {
       collaborativeMap.set("y", myRect.getY());
     } else if (currShape instanceof MyLine) {
       MyLine myLine = (MyLine) currShape;
-      collaborativeMap.set("x", myLine.getX());
-      collaborativeMap.set("y", myLine.getY());
-      collaborativeMap.set("sx", myLine.getSx());
-      collaborativeMap.set("sy", myLine.getSy());
+      CollaborativeList d = collaborativeMap.get("d");
+      d.clear();
+      d.push(Json.createArray().push(myLine.getX()).push(myLine.getY()));
+      d.push(Json.createArray().push(myLine.getSx()).push(myLine.getSy()));
     } else if (currShape instanceof MyPath) {
       MyPath myPath = (MyPath) currShape;
       CollaborativeList d = collaborativeMap.get("d");

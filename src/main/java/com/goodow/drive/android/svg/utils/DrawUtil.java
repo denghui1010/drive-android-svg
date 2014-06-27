@@ -154,8 +154,10 @@ public class DrawUtil {
     for (int i = 1; i < myPath.getPoints().size(); i++) {
       mPath.quadTo((myPath.getPoints().get(i - 1).x + myPath.getPoints().get(i).x) / 2, (myPath.getPoints().get(i - 1).y + myPath.getPoints().get(i).y) / 2, myPath.getPoints().get(i).x, myPath.getPoints().get(i).y);
     }
+    RectF rectF = computeBounds(mPath);
+    myPath.setBounds(rectF);
     mCanvas.save();
-//    mCanvas.rotate();
+    mCanvas.rotate(myPath.getTransform(), rectF.centerX(), rectF.centerY());
     if (myPath.getStroke_width() > 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
@@ -175,8 +177,6 @@ public class DrawUtil {
       mPaint.setStyle(Paint.Style.FILL);
       mCanvas.drawPath(mPath, mPaint);
     }
-    RectF rectF = computeBounds(mPath);
-    myPath.setBounds(rectF);
     if (myPath.isSelected()) {
       drawRectBounds(rectF);
     }
@@ -195,7 +195,7 @@ public class DrawUtil {
       } else if (graphic instanceof MyLine) {
         drawLine((MyLine) graphic);
       }
-      onShowPopupListener.onSelectedChange(graphic);
+      onShowPopupListener.onShowPopup(graphic);
     }
   }
 

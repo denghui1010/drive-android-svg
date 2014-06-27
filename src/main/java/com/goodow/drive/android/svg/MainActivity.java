@@ -170,7 +170,7 @@ public class MainActivity extends RoboActivity {
     mySurfaceView.setUtils(drawUtil, switchUtil, parseUtil);
     drawUtil.setOnShowPopupListener(new OnShowPopupListener() {
       @Override
-      public void onSelectedChange(MyBaseShape shape) {
+      public void onShowPopup(MyBaseShape shape) {
         View popupMenuBtn = shape.getPopupMenuBtn();
         if (shape.isSelected()) {
           if (popupMenuBtn == null) {
