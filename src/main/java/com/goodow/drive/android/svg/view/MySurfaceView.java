@@ -61,7 +61,7 @@ public class MySurfaceView extends SurfaceView {
   public static Select selectType;
   private int startX;
   private int startY;
-  private int startTransform;
+  private int startRotate;
   private int currentX;
   private int currentY;
   private MyBaseShape graphic;
@@ -181,7 +181,7 @@ public class MySurfaceView extends SurfaceView {
           graphic.setFill(0);
           graphic.setStroke(Color.RED);
           graphic.setStroke_width(3);
-          graphic.setTransform(0);
+          graphic.setRotate(0);
           updateShapes();
         }
         break;
@@ -330,7 +330,7 @@ public class MySurfaceView extends SurfaceView {
       case MotionEvent.ACTION_DOWN:
         startX = (int) event.getX();
         startY = (int) event.getY();
-        startTransform = currShape.getTransform();
+        startRotate = currShape.getRotate();
         break;
       case MotionEvent.ACTION_MOVE:
         currentX = (int) event.getX();
@@ -341,13 +341,13 @@ public class MySurfaceView extends SurfaceView {
         double d = Math.atan((double) (currentY - centerY) / (currentX - centerX));
         double s = Math.atan((double) (startY - centerY) / (startX - centerX));
         int degrees = (int) Math.toDegrees(d - s);
-        currShape.setTransform((startTransform + degrees) % 360);
+        currShape.setRotate((startRotate + degrees) % 360);
         updateShapes();
         break;
       case MotionEvent.ACTION_UP:
         int i = shapeList.indexOf(currShape);
         CollaborativeMap collaborativeMap = collList.get(i);
-        collaborativeMap.set("transform", currShape.getTransform());
+        collaborativeMap.set("rotate", currShape.getRotate());
         break;
     }
   }
