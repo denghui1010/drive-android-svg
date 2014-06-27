@@ -11,7 +11,7 @@ public class MyBaseShape {
   protected int fill;
   protected int stroke;
   protected int stroke_width;
-  protected int transform;
+  protected int rotate;
   protected boolean isSelected;
   protected RectF bounds;
   protected View popupMenuBtn;
@@ -52,12 +52,12 @@ public class MyBaseShape {
     this.stroke = stroke;
   }
 
-  public int getTransform() {
-    return transform;
+  public int getRotate() {
+    return rotate;
   }
 
-  public void setTransform(int transform) {
-    this.transform = transform;
+  public void setRotate(int rotate) {
+    this.rotate = rotate;
   }
 
   public int getStroke_width() {

@@ -65,7 +65,7 @@ public class ParseUtil {
     map.set("fill", shape.getFill());
     map.set("stroke", shape.getStroke());
     map.set("stroke_width", shape.getStroke_width());
-    map.set("transform", shape.getTransform());
+    map.set("rotate", shape.getRotate());
     map.set("type",shape.getType());
     map.onObjectChanged(new Handler<ObjectChangedEvent>() {
       @Override
@@ -162,11 +162,11 @@ public class ParseUtil {
     Double fill = map.get("fill");
     Double stroke = map.get("stroke");
     Double stroke_width = map.get("stroke_width");
-    Double transform = map.get("transform");
+    Double rotate = map.get("rotate");
     shape.setFill(fill.intValue());
     shape.setStroke(stroke.intValue());
     shape.setStroke_width(stroke_width.intValue());
-    shape.setTransform(transform.intValue());
+    shape.setRotate(rotate.intValue());
     return shape;
   }
 

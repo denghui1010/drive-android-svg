@@ -44,7 +44,7 @@ public class DrawUtil {
       return;
     }
     mCanvas.save();
-    mCanvas.rotate(myRect.getTransform(), myRect.getX() + myRect.getWidth() / 2, myRect.getY() + myRect.getHeight() + 2);
+    mCanvas.rotate(myRect.getRotate(), myRect.getX() + myRect.getWidth() / 2, myRect.getY() + myRect.getHeight() + 2);
     mPath.reset();
     mPath.addRect(myRect.getX(), myRect.getY(), myRect.getX() + myRect.getWidth(), myRect.getY() + myRect.getHeight(), Path.Direction.CW);
     if (myRect.getStroke_width() > 0) {
@@ -87,7 +87,7 @@ public class DrawUtil {
       return;
     }
     mCanvas.save();
-    mCanvas.rotate(myEllipse.getTransform(), myEllipse.getCx(), myEllipse.getCy());
+    mCanvas.rotate(myEllipse.getRotate(), myEllipse.getCx(), myEllipse.getCy());
     mPath.reset();
     mPath.addOval(new RectF(myEllipse.getCx() - myEllipse.getRx(), myEllipse.getCy() - myEllipse.getRy(), myEllipse.getCx() + myEllipse.getRx(), myEllipse.getCy() + myEllipse.getRy()), Path.Direction.CW);
     if (myEllipse.getStroke_width() > 0) {
@@ -118,7 +118,7 @@ public class DrawUtil {
       return;
     }
     mCanvas.save();
-    mCanvas.rotate(myLine.getTransform(), (myLine.getX() + myLine.getSx()) / 2, (myLine.getY() + myLine.getSy()) / 2);
+    mCanvas.rotate(myLine.getRotate(), (myLine.getX() + myLine.getSx()) / 2, (myLine.getY() + myLine.getSy()) / 2);
     mPath.reset();
     mPath.moveTo(myLine.getX(), myLine.getY());
     mPath.lineTo(myLine.getSx(), myLine.getSy());
@@ -157,7 +157,7 @@ public class DrawUtil {
     RectF rectF = computeBounds(mPath);
     myPath.setBounds(rectF);
     mCanvas.save();
-    mCanvas.rotate(myPath.getTransform(), rectF.centerX(), rectF.centerY());
+    mCanvas.rotate(myPath.getRotate(), rectF.centerX(), rectF.centerY());
     if (myPath.getStroke_width() > 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
