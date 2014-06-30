@@ -20,7 +20,6 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
@@ -37,8 +36,6 @@ import com.goodow.realtime.store.Store;
 import com.google.inject.Inject;
 
 import roboguice.activity.RoboActivity;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
 
 public class MainActivity extends RoboActivity {
 
