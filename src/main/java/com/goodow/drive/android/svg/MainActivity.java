@@ -42,7 +42,7 @@ public class MainActivity extends RoboActivity {
   @Inject
   private Store store;
   private Document doc;
-  private static final String ID = "ldh/test";
+  private static final String ID = "svg/0";
   //  @InjectView(R.id.view)
   private MySurfaceView mySurfaceView;
   //  @InjectView(R.id.ll_menu_root)
@@ -356,6 +356,7 @@ public class MainActivity extends RoboActivity {
       doc.close();
     }
     super.onDestroy();
-    android.os.Process.killProcess(android.os.Process.myPid());
+    drawUtil.getCollList().clear();
+    drawUtil.getShapeList().clear();
   }
 }
