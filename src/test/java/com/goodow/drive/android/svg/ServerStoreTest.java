@@ -7,11 +7,8 @@ package com.goodow.drive.android.svg;
 import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.java.JavaPlatform;
 import com.goodow.realtime.java.JavaWebSocket;
-import com.goodow.realtime.store.CollaborativeList;
-import com.goodow.realtime.store.CollaborativeMap;
-import com.goodow.realtime.store.Document;
-import com.goodow.realtime.store.Model;
-import com.goodow.realtime.store.Store;
+import com.goodow.realtime.store.*;
+import com.goodow.realtime.store.Error;
 import com.goodow.realtime.store.impl.StoreImpl;
 
 import org.junit.Test;
@@ -55,8 +52,19 @@ public class ServerStoreTest extends TestVerticle {
     }, new Handler<Model>() {
       @Override
       public void handle(Model mod) {
-
       }
-    }, null);
+    }, new Handler<com.goodow.realtime.store.Error>() {
+      @Override
+      public void handle(Error error) {
+        log.info(error.message());
+      }
+    });
+    try {
+        Thread.sleep(20000);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    log.info("time out");
+    VertxAssert.testComplete();
   }
 }
