@@ -16,11 +16,11 @@
         android:theme="@style/AppTheme" >
         <meta-data
             android:name="roboguice.modules"
-            android:value="com.goodow.drive.android.svg.DriveAndroidSvgModule"/>
+            android:value="com.goodow.drive.android.svg.DriveAndroidSvgModule, com.goodow.drive.android.svg.SvgModule"/>
 
         <activity
             android:theme="@style/ActionBarNoLogoNoHome"
-            android:name="com.goodow.drive.android.svg.MainActivity"
+            android:name=".SvgMainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

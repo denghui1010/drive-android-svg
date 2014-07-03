@@ -37,7 +37,7 @@ import com.google.inject.Inject;
 
 import roboguice.activity.RoboActivity;
 
-public class MainActivity extends RoboActivity {
+public class SvgMainActivity extends RoboActivity {
 
   @Inject
   private Store store;
@@ -112,7 +112,7 @@ public class MainActivity extends RoboActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    this.setContentView(R.layout.activity_main);
+    this.setContentView(R.layout.svg_activity_main);
     initView();
     initUtils();
     loadDoc();
@@ -207,7 +207,7 @@ public class MainActivity extends RoboActivity {
             (int) shape.getBounds().top, (int) shape.getBounds().right,
             (int) shape.getBounds().bottom);
         mySurfaceView.updateShapes();
-        PopupMenu popupMenu = new PopupMenu(MainActivity.this, textView);
+        PopupMenu popupMenu = new PopupMenu(SvgMainActivity.this, textView);
         Menu menu = popupMenu.getMenu();
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu, menu);
         popupMenu.show();
@@ -273,39 +273,39 @@ public class MainActivity extends RoboActivity {
     public View getView(int position, View convertView, ViewGroup parent) {
       View view = null;
       if (position == 0) {
-        TextView textView = new TextView(MainActivity.this);
+        TextView textView = new TextView(SvgMainActivity.this);
         textView.setText("操作");
         textView.setTextSize(20);
         textView.setPadding(20, 10, 0, 10);
         textView.setBackgroundColor(Color.LTGRAY);
         view = textView;
       } else if (position < opration.length + 1) {
-        RadioButton radioButton = new RadioButton(MainActivity.this);
+        RadioButton radioButton = new RadioButton(SvgMainActivity.this);
         radioButton.setText(opration[position - 1]);
         radioButton.setFocusable(false);
         radioButton.setClickable(false);
         view = radioButton;
       } else if (position == opration.length + 1) {
-        TextView textView = new TextView(MainActivity.this);
+        TextView textView = new TextView(SvgMainActivity.this);
         textView.setTextSize(20);
         textView.setPadding(20, 10, 0, 10);
         textView.setBackgroundColor(Color.LTGRAY);
         textView.setText("画笔");
         view = textView;
       } else if (position == opration.length + 2) {
-        TextView textView = new TextView(MainActivity.this);
+        TextView textView = new TextView(SvgMainActivity.this);
         textView.setText("画笔颜色");
         textView.setTextSize(16);
         textView.setPadding(20, 10, 0, 10);
         view = textView;
       } else if (position == opration.length + 3) {
-        TextView textView = new TextView(MainActivity.this);
+        TextView textView = new TextView(SvgMainActivity.this);
         textView.setText("画笔粗细");
         textView.setTextSize(16);
         textView.setPadding(20, 10, 0, 10);
         view = textView;
       } else if (position == opration.length + 4) {
-        TextView textView = new TextView(MainActivity.this);
+        TextView textView = new TextView(SvgMainActivity.this);
         textView.setText("填充颜色");
         textView.setTextSize(16);
         textView.setPadding(20, 10, 0, 10);

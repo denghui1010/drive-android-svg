@@ -30,7 +30,7 @@ public class SvgModule extends AbstractModule {
       busProvider.get().subscribeLocal("drive.svg", new MessageHandler<JsonObject>() {
         @Override
         public void handle(Message<JsonObject> message) {
-          Intent intent = new Intent(context.get(), MainActivity.class);
+          Intent intent = new Intent(context.get(), SvgMainActivity.class);
           intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
           context.get().startActivity(intent);
         }

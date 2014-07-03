@@ -13,11 +13,25 @@
  */
 package com.goodow.drive.android.svg;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.goodow.realtime.android.AndroidPlatform;
+import com.goodow.realtime.channel.Bus;
+import com.goodow.realtime.channel.Message;
+import com.goodow.realtime.channel.MessageHandler;
+import com.goodow.realtime.channel.impl.ReconnectBus;
+import com.goodow.realtime.channel.impl.ReliableSubscribeBus;
+import com.goodow.realtime.channel.impl.WebSocketBus;
+import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.java.JavaWebSocket;
+import com.goodow.realtime.json.Json;
+import com.goodow.realtime.json.JsonObject;
 import com.goodow.realtime.store.Store;
 import com.goodow.realtime.store.impl.StoreImpl;
 import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
@@ -30,6 +44,7 @@ import java.util.logging.Logger;
  */
 public class DriveAndroidSvgModule extends AbstractModule {
   private static final String SERVER = "realtime.goodow.com:1986";
+  private static final String URL = "ws://" + SERVER + "/channel/websocket";
 
   static {
     AndroidPlatform.register();
@@ -45,6 +60,20 @@ public class DriveAndroidSvgModule extends AbstractModule {
   @Singleton
   Store provideStore() {
     return new StoreImpl("ws://" + SERVER + "/channel/websocket", null);
+  }
+
+  @Provides
+  @Singleton
+  Bus provideBus(Store store) {
+    ReliableSubscribeBus bus = (ReliableSubscribeBus) store.getBus();
+    final ReconnectBus reconnectBus = (ReconnectBus) bus.getDelegate();
+    bus.subscribeLocal("Bus_Reconnet", new Handler<Message>() {
+      @Override
+      public void handle(Message event) {
+        reconnectBus.connect(URL, null);
+      }
+    });
+    return bus;
   }
 
 }
