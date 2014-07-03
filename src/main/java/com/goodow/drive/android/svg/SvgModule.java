@@ -27,15 +27,12 @@ public class SvgModule extends AbstractModule {
   public static class Binder {
     @Inject
     public Binder(final Provider<Bus> busProvider, final Provider<Context> context) {
-      busProvider.get().subscribe("drive.svg", new MessageHandler<JsonObject>() {
+      busProvider.get().subscribeLocal("drive.svg", new MessageHandler<JsonObject>() {
         @Override
         public void handle(Message<JsonObject> message) {
-          JsonObject body = message.body();
-          if (body.has("open") && body.getString("open").equals("svg")) {
-            Intent intent = new Intent(context.get(), MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.get().startActivity(intent);
-          }
+          Intent intent = new Intent(context.get(), MainActivity.class);
+          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          context.get().startActivity(intent);
         }
       });
     }
