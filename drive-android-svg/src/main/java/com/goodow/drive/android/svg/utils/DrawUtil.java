@@ -65,13 +65,13 @@ public class DrawUtil {
     RectF rectF = computeBounds(mPath);
     myRect.setBounds(rectF);
     if (myRect.isSelected()) {
-      drawRectBounds(rectF);
+      drawShapeBoundsRect(rectF);
     }
     mCanvas.restore();
 
   }
 
-  public void drawDashRect(int x, int y, int sx, int sy) {
+  public void drawSwitchBoundsRect(int x, int y, int sx, int sy) {
     mPaint.reset();
     mPaint.setAntiAlias(true);
     mPaint.setStyle(Paint.Style.STROKE);
@@ -81,6 +81,17 @@ public class DrawUtil {
     mPaint.setPathEffect(dashPathEffect);
     mCanvas.drawRect(x, y, sx, sy, mPaint);
   }
+
+//  public void drawCanvasBoundsRect() {
+//    mPaint.reset();
+//    mPaint.setAntiAlias(true);
+//    mPaint.setStyle(Paint.Style.STROKE);
+//    mPaint.setColor(Color.BLUE);
+//    mPaint.setStrokeWidth(2);
+//    DashPathEffect dashPathEffect = new DashPathEffect(new float[]{5, 5}, 1);
+//    mPaint.setPathEffect(dashPathEffect);
+//    mCanvas.drawRect(0, 0, mCanvas.getWidth(), mCanvas.getHeight(), mPaint);
+//  }
 
   public void drawEllipse(MyEllipse myEllipse) {
     if (mCanvas == null) {
@@ -108,7 +119,7 @@ public class DrawUtil {
     RectF rectF = computeBounds(mPath);
     myEllipse.setBounds(rectF);
     if (myEllipse.isSelected()) {
-      drawRectBounds(rectF);
+      drawShapeBoundsRect(rectF);
     }
     mCanvas.restore();
   }
@@ -140,7 +151,7 @@ public class DrawUtil {
     RectF rectF = computeBounds(mPath);
     myLine.setBounds(rectF);
     if (myLine.isSelected()) {
-      drawRectBounds(rectF);
+      drawShapeBoundsRect(rectF);
     }
     mCanvas.restore();
   }
@@ -178,14 +189,14 @@ public class DrawUtil {
       mCanvas.drawPath(mPath, mPaint);
     }
     if (myPath.isSelected()) {
-      drawRectBounds(rectF);
+      drawShapeBoundsRect(rectF);
     }
     mCanvas.restore();
 
   }
 
   public void drawAll() {
-    for(MyBaseShape graphic : shapeList){
+    for (MyBaseShape graphic : shapeList) {
       if (graphic instanceof MyRect) {
         drawRect((MyRect) graphic);
       } else if (graphic instanceof MyEllipse) {
@@ -199,7 +210,7 @@ public class DrawUtil {
     }
   }
 
-  private void drawRectBounds(RectF rectF) {
+  private void drawShapeBoundsRect(RectF rectF) {
     mPaint.reset();
     mPaint.setAntiAlias(true);
     mPaint.setColor(Color.RED);
@@ -219,15 +230,15 @@ public class DrawUtil {
     this.mCanvas = mCanvas;
   }
 
-  public List<MyBaseShape> getShapeList(){
+  public List<MyBaseShape> getShapeList() {
     return shapeList;
   }
 
-  public List<CollaborativeMap> getCollList(){
+  public List<CollaborativeMap> getCollList() {
     return collList;
   }
 
-  public void setOnShowPopupListener(OnShowPopupListener onShowPopupListener){
+  public void setOnShowPopupListener(OnShowPopupListener onShowPopupListener) {
     this.onShowPopupListener = onShowPopupListener;
   }
 }

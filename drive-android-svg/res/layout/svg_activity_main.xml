@@ -9,11 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.goodow.drive.android.svg.view.MySurfaceView
-            android:id="@+id/view"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+            android:background="#ffbdbdbd">
+
+            <com.goodow.drive.android.svg.view.MySurfaceView
+                android:id="@+id/view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+        </RelativeLayout>
 
         <ProgressBar
             android:id="@+id/pb_progress"
@@ -28,11 +34,11 @@
     </FrameLayout>
 
     <com.goodow.drive.android.svg.view.LeftMenuLayout
-        android:background="#00000000"
         android:id="@+id/ll_menu_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="-200dp"
+        android:background="#00000000"
         android:orientation="horizontal">
 
         <ListView

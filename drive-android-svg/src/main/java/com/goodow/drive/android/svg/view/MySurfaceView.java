@@ -85,6 +85,7 @@ public class MySurfaceView extends SurfaceView {
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
     }
 
     @Override
@@ -287,7 +288,7 @@ public class MySurfaceView extends SurfaceView {
         mDrawUtil.setCanvas(canvas);
         canvas.drawColor(Color.WHITE);
         mDrawUtil.drawAll();
-        mDrawUtil.drawDashRect(startX, startY, currentX, currentY);
+        mDrawUtil.drawSwitchBoundsRect(startX, startY, currentX, currentY);
         mHolder.unlockCanvasAndPost(canvas);
         break;
       case MotionEvent.ACTION_UP:

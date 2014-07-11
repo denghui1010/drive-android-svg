@@ -23,6 +23,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
+import com.goodow.drive.android.svg.utils.CoordinateUtil;
 import com.goodow.drive.android.svg.utils.DrawUtil;
 import com.goodow.drive.android.svg.utils.ParseUtil;
 import com.goodow.drive.android.svg.utils.SwitchUtil;
@@ -42,7 +43,7 @@ public class SvgMainActivity extends RoboActivity {
   @Inject
   private Store store;
   private Document doc;
-  private static final String ID = "svg/0";
+  private static final String ID = "svg/5";
   //  @InjectView(R.id.view)
   private MySurfaceView mySurfaceView;
   //  @InjectView(R.id.ll_menu_root)
@@ -63,6 +64,8 @@ public class SvgMainActivity extends RoboActivity {
   private ParseUtil parseUtil;
   @Inject
   private SwitchUtil switchUtil;
+  @Inject
+  private CoordinateUtil coordinateUtil;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -124,6 +127,7 @@ public class SvgMainActivity extends RoboActivity {
       @Override
       public void handle(Document document) {
         doc = document;
+        coordinateUtil.setRatio(document);
         pb_progress.setVisibility(View.INVISIBLE);
         mySurfaceView.setCanDraw(true);
         mySurfaceView.setDocument(doc);
@@ -134,6 +138,7 @@ public class SvgMainActivity extends RoboActivity {
       @Override
       public void handle(Model model) {
         model.getRoot().set("data", model.createList(null));
+        model.getRoot().set("ratio", 1.6);
       }
     };
     store.load(ID, onLoadHandler, initHandler, null);
@@ -185,6 +190,7 @@ public class SvgMainActivity extends RoboActivity {
         }
       }
     });
+    coordinateUtil.setView(mySurfaceView);
   }
 
   private void cancelSelected() {

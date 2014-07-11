@@ -16,6 +16,7 @@ import com.goodow.realtime.store.CollaborativeMap;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
 import com.goodow.realtime.store.ObjectChangedEvent;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.util.List;
@@ -26,6 +27,8 @@ import java.util.List;
 @Singleton
 public class ParseUtil {
   private OnRemoteChangeListener listener;
+  @Inject
+  private CoordinateUtil coordinateUtil;
 
   public CollaborativeMap parseShape2cmap(Document doc, MyBaseShape shape) {
     if (doc == null) {
@@ -36,31 +39,31 @@ public class ParseUtil {
     final CollaborativeMap map = model.createMap(null);
     if (shape instanceof MyRect) {
       MyRect rect = (MyRect) shape;
-      map.set("x", rect.getX());
-      map.set("y", rect.getY());
-      map.set("width", rect.getWidth());
-      map.set("height", rect.getHeight());
+      map.set("x", coordinateUtil.translateX2proportion(rect.getX()));
+      map.set("y", coordinateUtil.translateY2proportion(rect.getY()));
+      map.set("width", coordinateUtil.translateX2proportion(rect.getWidth()));
+      map.set("height", coordinateUtil.translateY2proportion(rect.getHeight()));
     } else if (shape instanceof MyLine) {
       MyLine line = (MyLine) shape;
       JsonArray array = Json.createArray();
-      array.push(Json.createArray().push(line.getX()).push(line.getY()));
-      array.push(Json.createArray().push(line.getSx()).push(line.getSy()));
+      array.push(Json.createArray().push(coordinateUtil.translateX2proportion(line.getX())).push(coordinateUtil.translateY2proportion(line.getY())));
+      array.push(coordinateUtil.translateX2proportion(line.getSx())).push(coordinateUtil.translateY2proportion(line.getSy()));
       CollaborativeList list = model.createList(array);
       map.set("d", list);
     } else if (shape instanceof MyPath) {
       MyPath path = (MyPath) shape;
       JsonArray pathArray = Json.createArray();
       for (int i = 0; i < path.getPoints().size(); i++) {
-        pathArray.push(Json.createArray().push(path.getPoints().get(i).x).push(path.getPoints().get(i).y));
+        pathArray.push(Json.createArray().push(coordinateUtil.translateX2proportion(path.getPoints().get(i).x)).push(coordinateUtil.translateY2proportion(path.getPoints().get(i).y)));
       }
       CollaborativeList list = model.createList(pathArray);
       map.set("d", list);
     } else if (shape instanceof MyEllipse) {
       MyEllipse ellipse = (MyEllipse) shape;
-      map.set("cx", ellipse.getCx());
-      map.set("cy", ellipse.getCy());
-      map.set("rx", ellipse.getRx());
-      map.set("ry", ellipse.getRy());
+      map.set("cx", coordinateUtil.translateX2proportion(ellipse.getCx()));
+      map.set("cy", coordinateUtil.translateY2proportion(ellipse.getCy()));
+      map.set("rx", coordinateUtil.translateX2proportion(ellipse.getRx()));
+      map.set("ry", coordinateUtil.translateY2proportion(ellipse.getRy()));
     }
     map.set("fill", shape.getFill());
     map.set("stroke", shape.getStroke());
@@ -107,14 +110,10 @@ public class ParseUtil {
         shape = new MyRect();
       }
       MyRect myRect = (MyRect) shape;
-      Double x = map.get("x");
-      Double y = map.get("y");
-      Double width = map.get("width");
-      Double height = map.get("height");
-      myRect.setX(x.intValue());
-      myRect.setY(y.intValue());
-      myRect.setWidth(width.intValue());
-      myRect.setHeight(height.intValue());
+      myRect.setX(coordinateUtil.translateX2local((Double) map.get("x")));
+      myRect.setY(coordinateUtil.translateY2local((Double) map.get("y")));
+      myRect.setWidth(coordinateUtil.translateX2local((Double) map.get("width")));
+      myRect.setHeight(coordinateUtil.translateY2local((Double) map.get("height")));
     } else if (type.equals("line")) {
       if (shape == null) {
         shape = new MyLine();
@@ -123,14 +122,10 @@ public class ParseUtil {
       CollaborativeList d = map.get("d");
       JsonArray start = d.get(0);
       JsonArray stop = d.get(1);
-      Double startX = start.get(0);
-      Double startY = start.get(1);
-      Double stopX = stop.get(0);
-      Double stopY = stop.get(1);
-      myLine.setX(startX.intValue());
-      myLine.setY(startY.intValue());
-      myLine.setSx(stopX.intValue());
-      myLine.setSy(stopY.intValue());
+      myLine.setX(coordinateUtil.translateX2local((Double) start.get(0)));
+      myLine.setY(coordinateUtil.translateY2local((Double)start.get(1)));
+      myLine.setSx(coordinateUtil.translateX2local((Double) stop.get(0)));
+      myLine.setSy(coordinateUtil.translateY2local((Double)stop.get(1)));
     } else if (type.equals("path")) {
       if (shape == null) {
         shape = new MyPath();
@@ -140,21 +135,17 @@ public class ParseUtil {
       myPath.getPoints().clear();
       for (int j = 0; j < d.length(); j++) {
         JsonArray point = d.get(j);
-        myPath.addPoint(new Point((int) point.getNumber(0), (int) point.getNumber(1)));
+        myPath.addPoint(new Point(coordinateUtil.translateX2local(point.getNumber(0)), coordinateUtil.translateY2local(point.getNumber(1))));
       }
     } else if (type.equals("ellipse")) {
       if (shape == null) {
         shape = new MyEllipse();
       }
       MyEllipse myEllipse = (MyEllipse) shape;
-      Double cx = map.get("cx");
-      Double cy = map.get("cy");
-      Double rx = map.get("rx");
-      Double ry = map.get("ry");
-      myEllipse.setCx(cx.intValue());
-      myEllipse.setCy(cy.intValue());
-      myEllipse.setRx(rx.intValue());
-      myEllipse.setRy(ry.intValue());
+      myEllipse.setCx(coordinateUtil.translateX2local((Double) map.get("cx")));
+      myEllipse.setCy(coordinateUtil.translateY2local((Double)map.get("cy")));
+      myEllipse.setRx(coordinateUtil.translateX2local((Double) map.get("rx")));
+      myEllipse.setRy(coordinateUtil.translateY2local((Double)map.get("ry")));
     } else {
       return null;
     }
