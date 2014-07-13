@@ -4,13 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
+        <groupId>com.goodow.realtime</groupId>
+        <artifactId>realtime-parent</artifactId>
+        <version>0.5.5-SNAPSHOT</version>
     </parent>
 
     <groupId>com.goodow.drive</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>drive-android-svg-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>drive-android-svg(parent)</name>
@@ -21,6 +21,11 @@
         <module>drive-android-svg</module>
         <module>drive-android-svg-samples</module>
     </modules>
+
+    <properties>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.6</maven.compiler.target>
+    </properties>
 
     <developers>
         <developer>
@@ -84,7 +89,6 @@
                 <groupId>com.jayway.maven.plugins.android.generation2</groupId>
                 <artifactId>android-maven-plugin</artifactId>
                 <extensions>true</extensions>
-                <version>3.8.2</version>
                 <configuration>
                     <sdk>
                         <platform>19</platform>

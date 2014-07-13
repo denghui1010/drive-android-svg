@@ -69,11 +69,11 @@ public class ParseUtil {
     map.set("stroke", shape.getStroke());
     map.set("stroke_width", shape.getStroke_width());
     map.set("rotate", shape.getRotate());
-    map.set("type",shape.getType());
+    map.set("type", shape.getType());
     map.onObjectChanged(new Handler<ObjectChangedEvent>() {
       @Override
       public void handle(ObjectChangedEvent objectChangedEvent) {
-        if(!objectChangedEvent.isLocal()) {
+        if (!objectChangedEvent.isLocal()) {
           listener.onRemoteChange(map);
         }
       }
@@ -82,9 +82,9 @@ public class ParseUtil {
     return map;
   }
 
-  public void parseDoc2map(Document doc, List<CollaborativeMap> collList, List<MyBaseShape> shapeList){
+  public void parseDoc2map(Document doc, List<CollaborativeMap> collList, List<MyBaseShape> shapeList) {
     CollaborativeList data = doc.getModel().getRoot().get("data");
-    for(int i=0; i<data.length(); i++){
+    for (int i = 0; i < data.length(); i++) {
       final CollaborativeMap map = data.get(i);
       map.onObjectChanged(new Handler<ObjectChangedEvent>() {
         @Override
@@ -99,11 +99,11 @@ public class ParseUtil {
     }
   }
 
-  public MyBaseShape parseCmap2shape(CollaborativeMap map){
-    return parseCmap2shape(map,null);
+  public MyBaseShape parseCmap2shape(CollaborativeMap map) {
+    return parseCmap2shape(map, null);
   }
 
-  public MyBaseShape parseCmap2shape(CollaborativeMap map, MyBaseShape shape){
+  public MyBaseShape parseCmap2shape(CollaborativeMap map, MyBaseShape shape) {
     String type = map.get("type");
     if (type.equals("rect")) {
       if (shape == null) {
@@ -123,9 +123,9 @@ public class ParseUtil {
       JsonArray start = d.get(0);
       JsonArray stop = d.get(1);
       myLine.setX(coordinateUtil.translateX2local((Double) start.get(0)));
-      myLine.setY(coordinateUtil.translateY2local((Double)start.get(1)));
+      myLine.setY(coordinateUtil.translateY2local((Double) start.get(1)));
       myLine.setSx(coordinateUtil.translateX2local((Double) stop.get(0)));
-      myLine.setSy(coordinateUtil.translateY2local((Double)stop.get(1)));
+      myLine.setSy(coordinateUtil.translateY2local((Double) stop.get(1)));
     } else if (type.equals("path")) {
       if (shape == null) {
         shape = new MyPath();
@@ -143,9 +143,9 @@ public class ParseUtil {
       }
       MyEllipse myEllipse = (MyEllipse) shape;
       myEllipse.setCx(coordinateUtil.translateX2local((Double) map.get("cx")));
-      myEllipse.setCy(coordinateUtil.translateY2local((Double)map.get("cy")));
+      myEllipse.setCy(coordinateUtil.translateY2local((Double) map.get("cy")));
       myEllipse.setRx(coordinateUtil.translateX2local((Double) map.get("rx")));
-      myEllipse.setRy(coordinateUtil.translateY2local((Double)map.get("ry")));
+      myEllipse.setRy(coordinateUtil.translateY2local((Double) map.get("ry")));
     } else {
       return null;
     }
@@ -161,7 +161,7 @@ public class ParseUtil {
     return shape;
   }
 
-  public void setOnRemoteChangeListener(OnRemoteChangeListener listener){
+  public void setOnRemoteChangeListener(OnRemoteChangeListener listener) {
     this.listener = listener;
   }
 

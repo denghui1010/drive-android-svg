@@ -13,25 +13,16 @@
  */
 package com.goodow.drive.android.svg;
 
-import android.content.Context;
-import android.content.Intent;
-
 import com.goodow.realtime.android.AndroidPlatform;
 import com.goodow.realtime.channel.Bus;
 import com.goodow.realtime.channel.Message;
-import com.goodow.realtime.channel.MessageHandler;
 import com.goodow.realtime.channel.impl.ReconnectBus;
 import com.goodow.realtime.channel.impl.ReliableSubscribeBus;
-import com.goodow.realtime.channel.impl.WebSocketBus;
 import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.java.JavaWebSocket;
-import com.goodow.realtime.json.Json;
-import com.goodow.realtime.json.JsonObject;
 import com.goodow.realtime.store.Store;
 import com.goodow.realtime.store.impl.StoreImpl;
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 

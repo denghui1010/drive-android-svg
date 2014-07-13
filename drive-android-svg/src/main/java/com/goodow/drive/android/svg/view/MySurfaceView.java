@@ -14,11 +14,13 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.goodow.drive.android.svg.OnRemoteChangeListener;
+import com.goodow.drive.android.svg.SvgMainActivity;
 import com.goodow.drive.android.svg.graphics.MyBaseShape;
 import com.goodow.drive.android.svg.graphics.MyEllipse;
 import com.goodow.drive.android.svg.graphics.MyLine;
 import com.goodow.drive.android.svg.graphics.MyPath;
 import com.goodow.drive.android.svg.graphics.MyRect;
+import com.goodow.drive.android.svg.utils.CoordinateUtil;
 import com.goodow.drive.android.svg.utils.DrawUtil;
 import com.goodow.drive.android.svg.utils.ParseUtil;
 import com.goodow.drive.android.svg.utils.SwitchUtil;
@@ -39,6 +41,7 @@ import java.util.List;
  * Created by liudenghui on 14-6-4.
  */
 public class MySurfaceView extends SurfaceView {
+
   public MySurfaceView(Context context) {
     super(context);
     init();
@@ -59,11 +62,11 @@ public class MySurfaceView extends SurfaceView {
   public static enum Select {RECT, ELLIPSE, OVAL, LINE, PATH, SWITCH, MOVE, ROTATE}
 
   public static Select selectType;
-  private int startX;
-  private int startY;
-  private int startRotate;
-  private int currentX;
-  private int currentY;
+  private float startX;
+  private float startY;
+  private float startRotate;
+  private float currentX;
+  private float currentY;
   private MyBaseShape graphic;
   private List<MyBaseShape> shapeList;
   private List<CollaborativeMap> collList;
@@ -71,8 +74,11 @@ public class MySurfaceView extends SurfaceView {
   private SwitchUtil mSwitchUtil;
   private DrawUtil mDrawUtil;
   private ParseUtil mParseUtil;
+  private CoordinateUtil mCoordinateUtil;
   private Document doc;
   private MyBaseShape currShape;
+  private RectF rectF;
+  private static final int BOUNDERY = 10;
 
   private SurfaceHolder.Callback mCallback = new SurfaceHolder.Callback() {
 
@@ -85,7 +91,7 @@ public class MySurfaceView extends SurfaceView {
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
+      rectF = new RectF(BOUNDERY, BOUNDERY, getWidth() - BOUNDERY, getHeight() - BOUNDERY);
     }
 
     @Override
@@ -117,8 +123,8 @@ public class MySurfaceView extends SurfaceView {
     }
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
-        startX = (int) event.getX();
-        startY = (int) event.getY();
+        startX = event.getX();
+        startY = event.getY();
         if (selectType == Select.RECT) {
           graphic = new MyRect();
           graphic.setType("rect");
@@ -139,52 +145,81 @@ public class MySurfaceView extends SurfaceView {
         }
         break;
       case MotionEvent.ACTION_MOVE:
-        currentX = (int) event.getX();
-        currentY = (int) event.getY();
-        int dX = currentX - startX;
-        int dY = currentY - startY;
+        currentX = event.getX();
+        currentY = event.getY();
+        int dX = (int) (currentX - startX);
+        int dY = (int) (currentY - startY);
+        if (graphic == null) {
+          return true;
+        }
         if (selectType == Select.RECT) {
           MyRect myRect = (MyRect) graphic;
-          myRect.setX(startX);
-          myRect.setY(startY);
-          myRect.setWidth(dX);
-          myRect.setHeight(dY);
+          myRect.generatePath((int) startX, (int) startY, dX, dY, 0);
+          if (myRect.isInRect(rectF)) {
+            myRect.setX((int) startX);
+            myRect.setY((int) startY);
+            myRect.setWidth(dX);
+            myRect.setHeight(dY);
+          }
         } else if (selectType == Select.OVAL) {
           MyEllipse oval = (MyEllipse) graphic;
-          int cenX = startX + dX / 2;
-          int cenY = startY + dY / 2;
+          int cenX = (int) (startX + (currentX - startX) / 2);
+          int cenY = (int) (startY + (currentY - startY) / 2);
           int r = (int) Math.sqrt((cenX - startX) * (cenX - startX) + (cenY - startY) * (cenY - startY));
-          oval.setCx(cenX);
-          oval.setCy(cenY);
-          oval.setRx(r);
-          oval.setRy(r);
-          oval.getRectF().set(cenX - r, cenY - r, cenX + r, cenY + r);
+          oval.generatePath(cenX, cenY, r, r, 0);
+          if (oval.isInRect(rectF)) {
+            oval.setCx(cenX);
+            oval.setCy(cenY);
+            oval.setRx(r);
+            oval.setRy(r);
+            oval.getRectF().set(cenX - r, cenY - r, cenX + r, cenY + r);
+          }
         } else if (selectType == Select.ELLIPSE) {
           MyEllipse myEllipse = (MyEllipse) graphic;
-          myEllipse.setCx(startX + dX / 2);
-          myEllipse.setCy(startY + dY / 2);
-          myEllipse.setRx(Math.abs(dX / 2));
-          myEllipse.setRy(Math.abs(dY / 2));
-          myEllipse.getRectF().set(startX, startY, currentX, currentY);
+          int cx = (int) startX + dX / 2;
+          int cy = (int) startY + dY / 2;
+          int rx = Math.abs(dX / 2);
+          int ry = Math.abs(dY / 2);
+          myEllipse.generatePath(cx, cy, rx, ry, 0);
+          if (myEllipse.isInRect(rectF)) {
+            myEllipse.setCx(cx);
+            myEllipse.setCy(cy);
+            myEllipse.setRx(rx);
+            myEllipse.setRy(ry);
+            myEllipse.getRectF().set(startX, startY, currentX, currentY);
+          }
         } else if (selectType == Select.LINE) {
           MyLine myLine = (MyLine) graphic;
-          myLine.setX(startX);
-          myLine.setY(startY);
-          myLine.setSx(startX + dX);
-          myLine.setSy(startY + dY);
+          myLine.generatePath((int) startX, (int) startY, (int) startX + dX, (int) startY + dY, 0);
+          if (myLine.isInRect(rectF)) {
+            myLine.setX((int) startX);
+            myLine.setY((int) startY);
+            myLine.setSx((int) startX + dX);
+            myLine.setSy((int) startY + dY);
+          }
         } else if (selectType == Select.PATH) {
+          if (currentX < BOUNDERY) {
+            currentX = BOUNDERY;
+          }
+          if (currentX > getWidth() - BOUNDERY) {
+            currentX = getWidth() - BOUNDERY;
+          }
+          if (currentY < BOUNDERY) {
+            currentY = BOUNDERY;
+          }
+          if (currentY > getHeight() - BOUNDERY) {
+            currentY = getHeight() - BOUNDERY;
+          }
           MyPath myPath = (MyPath) graphic;
           Point point = new Point();
-          point.set((int) event.getX(), (int) event.getY());
+          point.set((int) currentX, (int) currentY);
           myPath.addPoint(point);
         }
-        if (graphic != null) {
-          graphic.setFill(0);
-          graphic.setStroke(Color.RED);
-          graphic.setStroke_width(3);
-          graphic.setRotate(0);
-          updateShapes();
-        }
+        graphic.setFill(SvgMainActivity.defaultFillColor);
+        graphic.setStroke(SvgMainActivity.defaultStrokeColor);
+        graphic.setStroke_width(SvgMainActivity.defaultStrokeWidth);
+        graphic.setRotate(0);
+        updateShapes();
         break;
       case MotionEvent.ACTION_UP:
         if (graphic != null) {
@@ -199,10 +234,11 @@ public class MySurfaceView extends SurfaceView {
     this.isCanDraw = isCanDraw;
   }
 
-  public void setUtils(DrawUtil drawUtil, SwitchUtil switchUtil, ParseUtil parseUtil) {
+  public void setUtils(DrawUtil drawUtil, SwitchUtil switchUtil, ParseUtil parseUtil, CoordinateUtil coordinateUtil) {
     mDrawUtil = drawUtil;
     mSwitchUtil = switchUtil;
     mParseUtil = parseUtil;
+    mCoordinateUtil = coordinateUtil;
     shapeList = drawUtil.getShapeList();
     collList = drawUtil.getCollList();
     parseUtil.setOnRemoteChangeListener(new OnRemoteChangeListener() {
@@ -288,7 +324,7 @@ public class MySurfaceView extends SurfaceView {
         mDrawUtil.setCanvas(canvas);
         canvas.drawColor(Color.WHITE);
         mDrawUtil.drawAll();
-        mDrawUtil.drawSwitchBoundsRect(startX, startY, currentX, currentY);
+        mDrawUtil.drawSwitchBoundsRect((int) startX, (int) startY, (int) currentX, (int) currentY);
         mHolder.unlockCanvasAndPost(canvas);
         break;
       case MotionEvent.ACTION_UP:
@@ -307,8 +343,20 @@ public class MySurfaceView extends SurfaceView {
       case MotionEvent.ACTION_MOVE:
         currentX = (int) event.getX();
         currentY = (int) event.getY();
-        int dX = currentX - startX;
-        int dY = currentY - startY;
+        int dX = (int) (currentX - startX);
+        int dY = (int) (currentY - startY);
+        if (currShape.getBounds().top + dY < BOUNDERY) {
+          dY = -(int) currShape.getBounds().top + BOUNDERY;
+        }
+        if (currShape.getBounds().bottom + dY > getHeight() - BOUNDERY) {
+          dY = (int) (getHeight() - currShape.getBounds().bottom) - BOUNDERY;
+        }
+        if (currShape.getBounds().left + dX < BOUNDERY) {
+          dX = -(int) currShape.getBounds().left + BOUNDERY;
+        }
+        if (currShape.getBounds().right + dX > getWidth() - BOUNDERY) {
+          dX = (int) (getWidth() - currShape.getBounds().right) - BOUNDERY;
+        }
         translateMyBaseShape(dX, dY);
         View popupMenuBtn = currShape.getPopupMenuBtn();
         RectF bounds = currShape.getBounds();
@@ -339,11 +387,18 @@ public class MySurfaceView extends SurfaceView {
         RectF bounds = currShape.getBounds();
         float centerX = bounds.centerX();
         float centerY = bounds.centerY();
-        double d = Math.atan((double) (currentY - centerY) / (currentX - centerX));
-        double s = Math.atan((double) (startY - centerY) / (startX - centerX));
-        int degrees = (int) Math.toDegrees(d - s);
-        currShape.setRotate((startRotate + degrees) % 360);
+        double d = Math.atan((currentY - centerY) / (currentX - centerX));
+        double s = Math.atan((startY - centerY) / (startX - centerX));
+        double degrees = Math.toDegrees(d - s);
+        currShape.setRotate((int) (degrees + startRotate) % 360);
+        currShape.generatePath();
+        if (!currShape.isInRect(rectF)) {
+          degrees = 0;
+        }
         updateShapes();
+        startX = currentX;
+        startY = currentY;
+        startRotate += degrees;
         break;
       case MotionEvent.ACTION_UP:
         int i = shapeList.indexOf(currShape);
@@ -382,24 +437,24 @@ public class MySurfaceView extends SurfaceView {
     CollaborativeMap collaborativeMap = collList.get(i);
     if (currShape instanceof MyEllipse) {
       MyEllipse myEllipse = (MyEllipse) currShape;
-      collaborativeMap.set("cx", myEllipse.getCx());
-      collaborativeMap.set("cy", myEllipse.getCy());
+      collaborativeMap.set("cx", mCoordinateUtil.translateX2proportion(myEllipse.getCx()));
+      collaborativeMap.set("cy", mCoordinateUtil.translateY2proportion(myEllipse.getCy()));
     } else if (currShape instanceof MyRect) {
       MyRect myRect = (MyRect) currShape;
-      collaborativeMap.set("x", myRect.getX());
-      collaborativeMap.set("y", myRect.getY());
+      collaborativeMap.set("x", mCoordinateUtil.translateX2proportion(myRect.getX()));
+      collaborativeMap.set("y", mCoordinateUtil.translateY2proportion(myRect.getY()));
     } else if (currShape instanceof MyLine) {
       MyLine myLine = (MyLine) currShape;
       CollaborativeList d = collaborativeMap.get("d");
       d.clear();
-      d.push(Json.createArray().push(myLine.getX()).push(myLine.getY()));
-      d.push(Json.createArray().push(myLine.getSx()).push(myLine.getSy()));
+      d.push(Json.createArray().push(mCoordinateUtil.translateX2proportion(myLine.getX())).push(mCoordinateUtil.translateY2proportion(myLine.getY())));
+      d.push(Json.createArray().push(mCoordinateUtil.translateX2proportion(myLine.getSx())).push(mCoordinateUtil.translateY2proportion(myLine.getSy())));
     } else if (currShape instanceof MyPath) {
       MyPath myPath = (MyPath) currShape;
       CollaborativeList d = collaborativeMap.get("d");
       d.clear();
       for (int j = 0; j < myPath.getPoints().size(); j++) {
-        d.push(Json.createArray().push(myPath.getPoints().get(j).x).push(myPath.getPoints().get(j).y));
+        d.push(Json.createArray().push(mCoordinateUtil.translateX2proportion(myPath.getPoints().get(j).x)).push(mCoordinateUtil.translateY2proportion(myPath.getPoints().get(j).y)));
       }
     }
   }

@@ -37,7 +37,7 @@ public class ServerStoreTest extends TestVerticle {
 
   @Test
   public void test() {
-    store.load("ldh/test", new Handler<Document>() {
+    store.load("svg/5", new Handler<Document>() {
       @Override
       public void handle(Document doc) {
         Model mod = doc.getModel();

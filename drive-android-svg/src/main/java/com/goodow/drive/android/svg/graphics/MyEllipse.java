@@ -1,5 +1,6 @@
 package com.goodow.drive.android.svg.graphics;
 
+import android.graphics.Path;
 import android.graphics.RectF;
 
 /**
@@ -52,4 +53,18 @@ public class MyEllipse extends MyBaseShape {
   public void setRectF(RectF rectF) {
     this.rectF = rectF;
   }
+
+  public void generatePath(int cx, int cy, int rx, int ry, int rotate) {
+    path.reset();
+    path.addOval(new RectF(cx - rx, cy - ry, cx + rx, cy + ry), Path.Direction.CW);
+    matrix.setRotate(rotate, cx, cy);
+    path.transform(matrix);
+    path.computeBounds(bounds, true);
+  }
+
+  @Override
+  public void generatePath() {
+    generatePath(cx, cy, rx, ry, rotate);
+  }
+
 }

@@ -1,5 +1,7 @@
 package com.goodow.drive.android.svg.graphics;
 
+import android.graphics.Matrix;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.view.View;
 
@@ -13,11 +15,16 @@ public class MyBaseShape {
   protected int stroke_width;
   protected int rotate;
   protected boolean isSelected;
-  protected RectF bounds;
+  protected RectF bounds = new RectF();
   protected View popupMenuBtn;
+  protected Path path = new Path();
+  protected Matrix matrix = new Matrix();
 
-  public MyBaseShape(){
+  public Path getPath() {
+    return path;
+  }
 
+  public MyBaseShape() {
   }
 
   public View getPopupMenuBtn() {
@@ -76,19 +83,17 @@ public class MyBaseShape {
     this.fill = fill;
   }
 
-  public boolean containsShape(RectF rectF) {
+  public boolean isInRect(RectF rectF) {
     if (rectF.contains(bounds)) {
       return true;
     }
     return false;
   }
 
-  public void setBounds(RectF bounds) {
-    this.bounds = bounds;
-  }
-
   public RectF getBounds() {
     return bounds;
   }
 
+  public void generatePath() {
+  }
 }

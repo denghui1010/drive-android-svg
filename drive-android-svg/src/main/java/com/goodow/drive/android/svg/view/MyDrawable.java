@@ -15,11 +15,11 @@ public class MyDrawable extends InsetDrawable {
   private float mOffset;
   private float mPosition;
 
-  public void setmOffset(float offset){
+  public void setmOffset(float offset) {
     mOffset = offset;
   }
 
-  public void setPosition(float position){
+  public void setPosition(float position) {
     mPosition = position;
     invalidateSelf();
   }

@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.goodow.drive</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>drive-android-svg-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
@@ -29,6 +29,18 @@
             <groupId>com.goodow.realtime</groupId>
             <artifactId>realtime-android</artifactId>
             <version>${realtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.larswerkman</groupId>
+            <artifactId>HoloColorPicker</artifactId>
+            <version>1.4</version>
+            <type>aar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.larswerkman</groupId>
+                    <artifactId>HoloColorPicker</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- Test -->
         <dependency>

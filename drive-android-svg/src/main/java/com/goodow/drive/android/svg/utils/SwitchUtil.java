@@ -13,25 +13,21 @@ import java.util.List;
 @Singleton
 public class SwitchUtil {
 
-  public void switchShape(List<MyBaseShape> shapeList, int left, int top, int right, int bottom) {
+  public void switchShape(List<MyBaseShape> shapeList, float left, float top, float right, float bottom) {
     for (MyBaseShape shape : shapeList) {
       boolean isContains;
-      if(left==0 && top==0 && right==0 && bottom==0){
-        isContains = false;
-      } else {
-        isContains = shape.containsShape(setRectF(left, top, right, bottom));
-      }
-      if(!shape.isSelected() && isContains){
+      isContains = !(left == 0 && top == 0 && right == 0 && bottom == 0) && shape.isInRect(setRectF(left, top, right, bottom));
+      if (!shape.isSelected() && isContains) {
         shape.setSelected(true);
-      } else if(shape.isSelected() && !isContains){
+      } else if (shape.isSelected() && !isContains) {
         shape.setSelected(false);
       }
     }
   }
 
-  private RectF setRectF(int left, int top, int right, int bottom) {
+  private RectF setRectF(float left, float top, float right, float bottom) {
     RectF rectF = new RectF();
-    rectF.set(left, top, right, bottom);
+    rectF.set(left <= right ? left : right, top <= bottom ? top : bottom, left <= right ? right : left, top <= bottom ? bottom : top);
     return rectF;
   }
 

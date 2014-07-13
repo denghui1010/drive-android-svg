@@ -5,11 +5,11 @@
 
     <parent>
         <groupId>com.goodow.drive</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>drive-android-svg-parent</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>parent-samples</artifactId>
+    <artifactId>drive-android-svg-samples</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <name>drive-android-svg(samples)</name>

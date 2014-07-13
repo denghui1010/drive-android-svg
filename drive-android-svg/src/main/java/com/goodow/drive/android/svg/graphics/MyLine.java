@@ -40,4 +40,18 @@ public class MyLine extends MyBaseShape {
   public int getSy() {
     return sy;
   }
+
+  @Override
+  public void generatePath() {
+    generatePath(x, y, sx, sy, rotate);
+  }
+
+  public void generatePath(int x, int y, int sx, int sy, int rotate) {
+    path.reset();
+    path.moveTo(x, y);
+    path.lineTo(sx, sy);
+    matrix.setRotate(rotate, (x + sx) / 2, (y + sy) / 2);
+    path.transform(matrix);
+    path.computeBounds(bounds, true);
+  }
 }

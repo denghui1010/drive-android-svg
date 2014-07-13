@@ -5,21 +5,22 @@
     android:layout_height="match_parent">
 
     <FrameLayout
-        android:id="@+id/surfaceview_root"
+        android:background="#ffbdbdbd"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <RelativeLayout
+        <FrameLayout
+            android:layout_gravity="center"
+            android:id="@+id/surfaceview_root"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#ffbdbdbd">
+            android:layout_height="match_parent">
 
             <com.goodow.drive.android.svg.view.MySurfaceView
                 android:id="@+id/view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 />
-        </RelativeLayout>
+        </FrameLayout>
 
         <ProgressBar
             android:id="@+id/pb_progress"

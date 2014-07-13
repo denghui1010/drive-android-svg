@@ -78,7 +78,7 @@ public class LeftMenuLayout extends LinearLayout {
 
 
   private void synAction() {
-    if(mDrawable == null){
+    if (mDrawable == null) {
       return;
     }
     float position = -getScrollX() / (float) mWidth;

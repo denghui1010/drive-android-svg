@@ -4,7 +4,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.RectF;
 
 import com.goodow.drive.android.svg.OnShowPopupListener;
@@ -26,149 +25,112 @@ import java.util.List;
 @Singleton
 public class DrawUtil {
   private Paint mPaint = new Paint();
+  private Paint shapeBoundsPaint = new Paint();
+  private Paint switchBoundsPaint = new Paint();
   private Canvas mCanvas;
-  private DashPathEffect rectBounds;
-  private Path mPath;
+  private DashPathEffect shapeBoundsEffect;
+  private DashPathEffect shapeBoundsEffect2;
+  private DashPathEffect switchBoundsEffect;
   private List<MyBaseShape> shapeList = new ArrayList<MyBaseShape>();
   private List<CollaborativeMap> collList = new ArrayList<CollaborativeMap>();
   private OnShowPopupListener onShowPopupListener;
 
 
   public DrawUtil() {
-    rectBounds = new DashPathEffect(new float[]{3, 12, 12, 24}, 0);
-    mPath = new Path();
+    shapeBoundsEffect = new DashPathEffect(new float[]{3, 12, 3, 12}, 0);
+    shapeBoundsEffect2 = new DashPathEffect(new float[]{0, 6, 6, 3}, 0);
+    switchBoundsEffect = new DashPathEffect(new float[]{5, 5}, 1);
   }
 
   public void drawRect(MyRect myRect) {
     if (mCanvas == null) {
       return;
     }
-    mCanvas.save();
-    mCanvas.rotate(myRect.getRotate(), myRect.getX() + myRect.getWidth() / 2, myRect.getY() + myRect.getHeight() + 2);
-    mPath.reset();
-    mPath.addRect(myRect.getX(), myRect.getY(), myRect.getX() + myRect.getWidth(), myRect.getY() + myRect.getHeight(), Path.Direction.CW);
+    myRect.generatePath();
     if (myRect.getStroke_width() > 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setColor(myRect.getStroke());
       mPaint.setStyle(Paint.Style.STROKE);
       mPaint.setStrokeWidth(myRect.getStroke_width());
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myRect.getPath(), mPaint);
     }
     if (myRect.getFill() != 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setStyle(Paint.Style.FILL);
       mPaint.setColor(myRect.getFill());
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myRect.getPath(), mPaint);
     }
-    RectF rectF = computeBounds(mPath);
-    myRect.setBounds(rectF);
     if (myRect.isSelected()) {
-      drawShapeBoundsRect(rectF);
+      drawShapeBoundsRect(myRect.getBounds());
     }
-    mCanvas.restore();
-
   }
 
   public void drawSwitchBoundsRect(int x, int y, int sx, int sy) {
-    mPaint.reset();
-    mPaint.setAntiAlias(true);
-    mPaint.setStyle(Paint.Style.STROKE);
-    mPaint.setColor(Color.BLUE);
-    mPaint.setStrokeWidth(2);
-    DashPathEffect dashPathEffect = new DashPathEffect(new float[]{5, 5}, 1);
-    mPaint.setPathEffect(dashPathEffect);
-    mCanvas.drawRect(x, y, sx, sy, mPaint);
+    switchBoundsPaint.setAntiAlias(true);
+    switchBoundsPaint.setStyle(Paint.Style.STROKE);
+    switchBoundsPaint.setColor(Color.BLUE);
+    switchBoundsPaint.setStrokeWidth(2);
+    switchBoundsPaint.setPathEffect(switchBoundsEffect);
+    mCanvas.drawRect(x, y, sx, sy, switchBoundsPaint);
   }
-
-//  public void drawCanvasBoundsRect() {
-//    mPaint.reset();
-//    mPaint.setAntiAlias(true);
-//    mPaint.setStyle(Paint.Style.STROKE);
-//    mPaint.setColor(Color.BLUE);
-//    mPaint.setStrokeWidth(2);
-//    DashPathEffect dashPathEffect = new DashPathEffect(new float[]{5, 5}, 1);
-//    mPaint.setPathEffect(dashPathEffect);
-//    mCanvas.drawRect(0, 0, mCanvas.getWidth(), mCanvas.getHeight(), mPaint);
-//  }
 
   public void drawEllipse(MyEllipse myEllipse) {
     if (mCanvas == null) {
       return;
     }
-    mCanvas.save();
-    mCanvas.rotate(myEllipse.getRotate(), myEllipse.getCx(), myEllipse.getCy());
-    mPath.reset();
-    mPath.addOval(new RectF(myEllipse.getCx() - myEllipse.getRx(), myEllipse.getCy() - myEllipse.getRy(), myEllipse.getCx() + myEllipse.getRx(), myEllipse.getCy() + myEllipse.getRy()), Path.Direction.CW);
+    myEllipse.generatePath();
     if (myEllipse.getStroke_width() > 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setColor(myEllipse.getStroke());
       mPaint.setStyle(Paint.Style.STROKE);
       mPaint.setStrokeWidth(myEllipse.getStroke_width());
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myEllipse.getPath(), mPaint);
     }
     if (myEllipse.getFill() != 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setColor(myEllipse.getFill());
       mPaint.setStyle(Paint.Style.FILL);
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myEllipse.getPath(), mPaint);
     }
-    RectF rectF = computeBounds(mPath);
-    myEllipse.setBounds(rectF);
     if (myEllipse.isSelected()) {
-      drawShapeBoundsRect(rectF);
+      drawShapeBoundsRect(myEllipse.getBounds());
     }
-    mCanvas.restore();
   }
 
   public void drawLine(MyLine myLine) {
     if (mCanvas == null) {
       return;
     }
-    mCanvas.save();
-    mCanvas.rotate(myLine.getRotate(), (myLine.getX() + myLine.getSx()) / 2, (myLine.getY() + myLine.getSy()) / 2);
-    mPath.reset();
-    mPath.moveTo(myLine.getX(), myLine.getY());
-    mPath.lineTo(myLine.getSx(), myLine.getSy());
+    myLine.generatePath();
     if (myLine.getStroke_width() > 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setColor(myLine.getStroke());
       mPaint.setStyle(Paint.Style.STROKE);
       mPaint.setStrokeWidth(myLine.getStroke_width());
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myLine.getPath(), mPaint);
     }
     if (myLine.getFill() != 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setColor(myLine.getFill());
       mPaint.setStyle(Paint.Style.FILL);
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myLine.getPath(), mPaint);
     }
-    RectF rectF = computeBounds(mPath);
-    myLine.setBounds(rectF);
     if (myLine.isSelected()) {
-      drawShapeBoundsRect(rectF);
+      drawShapeBoundsRect(myLine.getBounds());
     }
-    mCanvas.restore();
   }
 
   public void drawPath(MyPath myPath) {
     if (mCanvas == null || myPath.getPoints().size() == 0) {
       return;
     }
-    mPath.reset();
-    mPath.moveTo(myPath.getPoints().get(0).x, myPath.getPoints().get(0).y);
-    for (int i = 1; i < myPath.getPoints().size(); i++) {
-      mPath.quadTo((myPath.getPoints().get(i - 1).x + myPath.getPoints().get(i).x) / 2, (myPath.getPoints().get(i - 1).y + myPath.getPoints().get(i).y) / 2, myPath.getPoints().get(i).x, myPath.getPoints().get(i).y);
-    }
-    RectF rectF = computeBounds(mPath);
-    myPath.setBounds(rectF);
-    mCanvas.save();
-    mCanvas.rotate(myPath.getRotate(), rectF.centerX(), rectF.centerY());
+    myPath.generatePath();
     if (myPath.getStroke_width() > 0) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
@@ -177,7 +139,7 @@ public class DrawUtil {
       mPaint.setColor(myPath.getStroke());
       mPaint.setStyle(Paint.Style.STROKE);
       mPaint.setStrokeWidth(myPath.getStroke_width());
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myPath.getPath(), mPaint);
     }
     if (myPath.getFill() != 0) {
       mPaint.reset();
@@ -186,13 +148,11 @@ public class DrawUtil {
       mPaint.setStrokeJoin(Paint.Join.ROUND);
       mPaint.setColor(myPath.getFill());
       mPaint.setStyle(Paint.Style.FILL);
-      mCanvas.drawPath(mPath, mPaint);
+      mCanvas.drawPath(myPath.getPath(), mPaint);
     }
     if (myPath.isSelected()) {
-      drawShapeBoundsRect(rectF);
+      drawShapeBoundsRect(myPath.getBounds());
     }
-    mCanvas.restore();
-
   }
 
   public void drawAll() {
@@ -211,19 +171,16 @@ public class DrawUtil {
   }
 
   private void drawShapeBoundsRect(RectF rectF) {
-    mPaint.reset();
-    mPaint.setAntiAlias(true);
-    mPaint.setColor(Color.RED);
-    mPaint.setStrokeWidth(3);
-    mPaint.setStyle(Paint.Style.STROKE);
-    mPaint.setPathEffect(rectBounds);
-    mCanvas.drawRect(rectF, mPaint);
-  }
+    shapeBoundsPaint.setAntiAlias(true);
+    shapeBoundsPaint.setColor(Color.RED);
+    shapeBoundsPaint.setStrokeWidth(3);
+    shapeBoundsPaint.setStyle(Paint.Style.STROKE);
+    shapeBoundsPaint.setPathEffect(shapeBoundsEffect);
+    mCanvas.drawRect(rectF, shapeBoundsPaint);
+    shapeBoundsPaint.setColor(Color.YELLOW);
+    shapeBoundsPaint.setPathEffect(shapeBoundsEffect2);
+    mCanvas.drawRect(rectF, shapeBoundsPaint);
 
-  private RectF computeBounds(Path path) {
-    RectF rectF = new RectF();
-    path.computeBounds(rectF, true);
-    return rectF;
   }
 
   public void setCanvas(Canvas mCanvas) {

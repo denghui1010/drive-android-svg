@@ -27,9 +27,12 @@ import com.goodow.drive.android.svg.utils.CoordinateUtil;
 import com.goodow.drive.android.svg.utils.DrawUtil;
 import com.goodow.drive.android.svg.utils.ParseUtil;
 import com.goodow.drive.android.svg.utils.SwitchUtil;
+import com.goodow.drive.android.svg.view.FillColorDialog;
 import com.goodow.drive.android.svg.view.LeftMenuLayout;
 import com.goodow.drive.android.svg.view.MyDrawable;
 import com.goodow.drive.android.svg.view.MySurfaceView;
+import com.goodow.drive.android.svg.view.StrokeColorDialog;
+import com.goodow.drive.android.svg.view.StrokeWidthDialog;
 import com.goodow.realtime.core.Handler;
 import com.goodow.realtime.store.Document;
 import com.goodow.realtime.store.Model;
@@ -57,6 +60,9 @@ public class SvgMainActivity extends RoboActivity {
   //  @InjectView(R.id.surfaceview_root)
   private FrameLayout surfaceview_root;
   private ActionBar actionBar;
+  public static int defaultStrokeWidth = 3;
+  public static int defaultFillColor = 0;
+  public static int defaultStrokeColor = Color.RED;
 
   @Inject
   private DrawUtil drawUtil;
@@ -66,6 +72,12 @@ public class SvgMainActivity extends RoboActivity {
   private SwitchUtil switchUtil;
   @Inject
   private CoordinateUtil coordinateUtil;
+  @Inject
+  private StrokeWidthDialog strokeWidthDialog;
+  @Inject
+  private StrokeColorDialog strokeColorDialog;
+  @Inject
+  private FillColorDialog fillColorDialog;
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -102,11 +114,19 @@ public class SvgMainActivity extends RoboActivity {
         return true;
       }
       if (MySurfaceView.selectType == MySurfaceView.Select.MOVE
-          || MySurfaceView.selectType == MySurfaceView.Select.ROTATE) {
+              || MySurfaceView.selectType == MySurfaceView.Select.ROTATE) {
         cancelSelected();
         MySurfaceView.selectType = MySurfaceView.Select.SWITCH;
         actionBar.setTitle("选择");
         return true;
+      }
+      if (MySurfaceView.selectType == MySurfaceView.Select.SWITCH) {
+        for (MyBaseShape shape : drawUtil.getShapeList()) {
+          if (shape.getPopupMenuBtn() != null) {
+            cancelSelected();
+            return true;
+          }
+        }
       }
     }
     return super.onKeyDown(keyCode, event);
@@ -169,7 +189,7 @@ public class SvgMainActivity extends RoboActivity {
   }
 
   private void initUtils() {
-    mySurfaceView.setUtils(drawUtil, switchUtil, parseUtil);
+    mySurfaceView.setUtils(drawUtil, switchUtil, parseUtil, coordinateUtil);
     drawUtil.setOnShowPopupListener(new OnShowPopupListener() {
       @Override
       public void onShowPopup(MyBaseShape shape) {
@@ -190,7 +210,7 @@ public class SvgMainActivity extends RoboActivity {
         }
       }
     });
-    coordinateUtil.setView(mySurfaceView);
+    coordinateUtil.setView(surfaceview_root);
   }
 
   private void cancelSelected() {
@@ -207,11 +227,10 @@ public class SvgMainActivity extends RoboActivity {
     textView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-
         mySurfaceView.setCurrentShape(shape);
-        switchUtil.switchShape(drawUtil.getShapeList(), (int) shape.getBounds().left,
-            (int) shape.getBounds().top, (int) shape.getBounds().right,
-            (int) shape.getBounds().bottom);
+        switchUtil.switchShape(drawUtil.getShapeList(), shape.getBounds().left,
+                                  shape.getBounds().top, shape.getBounds().right,
+                                  shape.getBounds().bottom);
         mySurfaceView.updateShapes();
         PopupMenu popupMenu = new PopupMenu(SvgMainActivity.this, textView);
         Menu menu = popupMenu.getMenu();
@@ -231,8 +250,8 @@ public class SvgMainActivity extends RoboActivity {
             } else if (item.getItemId() == R.id.popup_delete) {
               hidePopup(shape);
               mySurfaceView.deleteShape(shape);
-            } else if (item.getItemId()
-                == R.id.popup_cancel) {//                textView.setText("编辑");
+            } else if (item.getItemId() == R.id.popup_cancel) {
+              cancelSelected();
               MySurfaceView.selectType = MySurfaceView.Select.SWITCH;
               actionBar.setTitle("选择");
 
@@ -244,7 +263,7 @@ public class SvgMainActivity extends RoboActivity {
     });
     FrameLayout.LayoutParams layoutParams =
         new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT);
+                                        ViewGroup.LayoutParams.WRAP_CONTENT);
     layoutParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
     layoutParams.bottomMargin = mySurfaceView.getHeight() - (int) bounds.top;
     layoutParams.rightMargin = mySurfaceView.getWidth() - (int) bounds.right;
@@ -258,7 +277,7 @@ public class SvgMainActivity extends RoboActivity {
   }
 
   class MyAdapter extends BaseAdapter {
-    private String[] opration = new String[] {"选择", "矩形", "圆", "椭圆", "线", "路径"};
+    private String[] opration = new String[]{"选择", "矩形", "圆", "椭圆", "线", "路径"};
 
     @Override
     public int getCount() {
@@ -349,6 +368,15 @@ public class SvgMainActivity extends RoboActivity {
         case 6:
           MySurfaceView.selectType = MySurfaceView.Select.PATH;
           actionBar.setTitle("曲线");
+          break;
+        case 8:
+          strokeColorDialog.show();
+          break;
+        case 9:
+          strokeWidthDialog.show();
+          break;
+        case 10:
+          fillColorDialog.show();
           break;
       }
       cancelSelected();

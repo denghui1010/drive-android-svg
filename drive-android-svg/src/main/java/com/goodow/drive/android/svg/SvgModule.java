@@ -20,7 +20,7 @@ public class SvgModule extends AbstractModule {
 
   @Override
   protected void configure() {
-     bind(Binder.class).asEagerSingleton();
+    bind(Binder.class).asEagerSingleton();
   }
 
   @Singleton
