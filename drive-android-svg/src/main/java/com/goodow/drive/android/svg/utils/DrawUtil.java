@@ -55,7 +55,7 @@ public class DrawUtil {
       mPaint.setStrokeWidth(myRect.getStroke_width());
       mCanvas.drawPath(myRect.getPath(), mPaint);
     }
-    if (myRect.getFill() != 0) {
+    if (myRect.getFill() != -1) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setStyle(Paint.Style.FILL);
@@ -89,7 +89,7 @@ public class DrawUtil {
       mPaint.setStrokeWidth(myEllipse.getStroke_width());
       mCanvas.drawPath(myEllipse.getPath(), mPaint);
     }
-    if (myEllipse.getFill() != 0) {
+    if (myEllipse.getFill() != -1) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setColor(myEllipse.getFill());
@@ -114,7 +114,7 @@ public class DrawUtil {
       mPaint.setStrokeWidth(myLine.getStroke_width());
       mCanvas.drawPath(myLine.getPath(), mPaint);
     }
-    if (myLine.getFill() != 0) {
+    if (myLine.getFill() != -1) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setColor(myLine.getFill());
@@ -141,7 +141,7 @@ public class DrawUtil {
       mPaint.setStrokeWidth(myPath.getStroke_width());
       mCanvas.drawPath(myPath.getPath(), mPaint);
     }
-    if (myPath.getFill() != 0) {
+    if (myPath.getFill() != -1) {
       mPaint.reset();
       mPaint.setAntiAlias(true);
       mPaint.setStrokeCap(Paint.Cap.ROUND);// 形状

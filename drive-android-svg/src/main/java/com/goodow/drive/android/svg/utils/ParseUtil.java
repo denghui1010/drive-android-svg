@@ -47,7 +47,7 @@ public class ParseUtil {
       MyLine line = (MyLine) shape;
       JsonArray array = Json.createArray();
       array.push(Json.createArray().push(coordinateUtil.translateX2proportion(line.getX())).push(coordinateUtil.translateY2proportion(line.getY())));
-      array.push(coordinateUtil.translateX2proportion(line.getSx())).push(coordinateUtil.translateY2proportion(line.getSy()));
+      array.push(Json.createArray().push(coordinateUtil.translateX2proportion(line.getSx())).push(coordinateUtil.translateY2proportion(line.getSy())));
       CollaborativeList list = model.createList(array);
       map.set("d", list);
     } else if (shape instanceof MyPath) {

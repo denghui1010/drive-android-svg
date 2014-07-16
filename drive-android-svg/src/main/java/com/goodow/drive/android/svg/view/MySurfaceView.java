@@ -154,12 +154,16 @@ public class MySurfaceView extends SurfaceView {
         }
         if (selectType == Select.RECT) {
           MyRect myRect = (MyRect) graphic;
-          myRect.generatePath((int) startX, (int) startY, dX, dY, 0);
+          int x = (int) (dX >= 0 ? startX : startX + dX);
+          int y = (int) (dY >= 0 ? startY : startY + dY);
+          int width = Math.abs(dX);
+          int height = Math.abs(dY);
+          myRect.generatePath(x, y, width, height, 0);
           if (myRect.isInRect(rectF)) {
-            myRect.setX((int) startX);
-            myRect.setY((int) startY);
-            myRect.setWidth(dX);
-            myRect.setHeight(dY);
+            myRect.setX(x);
+            myRect.setY(y);
+            myRect.setWidth(width);
+            myRect.setHeight(height);
           }
         } else if (selectType == Select.OVAL) {
           MyEllipse oval = (MyEllipse) graphic;

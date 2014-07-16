@@ -13,4 +13,13 @@
     <name>drive-android-svg(samples-demo)</name>
     <packaging>apk</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.goodow.drive</groupId>
+            <artifactId>drive-android-svg</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <type>aar</type>
+        </dependency>
+    </dependencies>
+
 </project>

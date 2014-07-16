@@ -61,7 +61,7 @@ public class SvgMainActivity extends RoboActivity {
   private FrameLayout surfaceview_root;
   private ActionBar actionBar;
   public static int defaultStrokeWidth = 3;
-  public static int defaultFillColor = 0;
+  public static int defaultFillColor = -1;
   public static int defaultStrokeColor = Color.RED;
 
   @Inject

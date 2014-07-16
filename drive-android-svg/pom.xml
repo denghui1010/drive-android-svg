@@ -12,11 +12,12 @@
 
     <artifactId>drive-android-svg</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>aar</packaging>
+    <packaging>${packaging}</packaging>
     <name>drive-android-svg</name>
 
     <properties>
         <realtime.version>0.5.5-SNAPSHOT</realtime.version>
+        <packaging>aar</packaging>
     </properties>
 
     <dependencies>

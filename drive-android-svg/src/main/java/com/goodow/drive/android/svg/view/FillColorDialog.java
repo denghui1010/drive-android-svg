@@ -40,7 +40,7 @@ public class FillColorDialog {
     builder.setNeutralButton("不填充", new DialogInterface.OnClickListener() {
       @Override
       public void onClick(DialogInterface dialog, int which) {
-        SvgMainActivity.defaultFillColor = 0;
+        SvgMainActivity.defaultFillColor = -1;
         picker.setColor(Color.RED);
         picker.setOldCenterColor(Color.TRANSPARENT);
         picker.setNewCenterColor(Color.TRANSPARENT);
@@ -60,8 +60,8 @@ public class FillColorDialog {
 
   public void show() {
     alertDialog.show();
-    picker.setColor(SvgMainActivity.defaultFillColor == 0 ? Color.RED : SvgMainActivity.defaultFillColor);
-    picker.setNewCenterColor(SvgMainActivity.defaultFillColor == 0 ? Color.TRANSPARENT : SvgMainActivity.defaultFillColor);
-    picker.setOldCenterColor(SvgMainActivity.defaultFillColor == 0 ? Color.TRANSPARENT : SvgMainActivity.defaultFillColor);
+    picker.setColor(SvgMainActivity.defaultFillColor == -1 ? Color.RED : SvgMainActivity.defaultFillColor);
+    picker.setNewCenterColor(SvgMainActivity.defaultFillColor == -1 ? Color.TRANSPARENT : SvgMainActivity.defaultFillColor);
+    picker.setOldCenterColor(SvgMainActivity.defaultFillColor == -1 ? Color.TRANSPARENT : SvgMainActivity.defaultFillColor);
   }
 }

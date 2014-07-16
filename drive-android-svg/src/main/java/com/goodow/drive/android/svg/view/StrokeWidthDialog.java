@@ -24,7 +24,6 @@ import com.google.inject.Singleton;
 public class StrokeWidthDialog {
   private AlertDialog alertDialog;
   private NumberPicker numberPicker;
-  private int oldValue;
   private ImageView sample;
   private Paint mPaint;
   private Canvas canvas;
@@ -80,7 +79,6 @@ public class StrokeWidthDialog {
       }
     });
     alertDialog.show();
-    oldValue = numberPicker.getValue();
     numberPicker.setValue(SvgMainActivity.defaultStrokeWidth);
   }
 
@@ -88,8 +86,6 @@ public class StrokeWidthDialog {
     mPaint = new Paint();
     mPaint.setAntiAlias(true);
     mPaint.setStyle(Paint.Style.STROKE);
-    mPaint.setStrokeJoin(Paint.Join.ROUND);// 设置外边缘
-    mPaint.setStrokeCap(Paint.Cap.SQUARE);// 形状
     mPaint.setStrokeWidth(numberPicker.getValue());// 画笔宽度
     mPaint.setColor(Color.RED);
     path = new Path();
